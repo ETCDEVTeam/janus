@@ -1,0 +1,33 @@
+language: go
+go_import_path: github.com/ethereumproject/janus
+
+go: 1.8
+os:
+- linux
+- osx
+
+env:
+  global:
+    # - secure: "MjvfqrKakMa+z+6LFxaL30n+BtjxUm2BnJ6/+S5cbxoCcXGVUBQf9LZ7+FbxIiucZqe7LoawPfLfrzyYPH9Lf03o+gUAdqV2Mm9EYVh5cbF51DmhcRL36Pubm4BeR2DdZTk/v31/TN9g/D9/rsCCwpwFuQB4iuBwYLtyJi8JLopVLpw7/ZI/8EYkOAE/3L0t4ICOMYexKGGi8XkVCC0TWBAHbzFYfeRJxspDNP2WhLS3vJdqDoJKFi/p/ZFzn2J4GKP6hhSUWzG57MpshhYcnIFzt4ZgB1sa1gNF04fe0gT+qAP9WuMFuUPgKhAN/bIPy78BfUi3ScJVYMj6y5D9PzN5+Kp3bo0SsXf6tAJ4t8m8IfU7FBpZkctMxP5aqvu/WX+eHgjNhVkHseZmRO/kst1YfXa5cjjAbiXwivRFtIv7LTrlpshB06k6zj9kD1JngOjf9sLnyYv38Njy/Vb1rK2kkPGMGzLDfkxxmrVgbijfvxX1Hidn97X/y6iLZvq14XsycoWFetiH67OT81grL1hpYC2HyTIdVrG/8CT1FtHsRKa4DqGiWAlaQf8ksm/TPGczylZbtEXFqDLuVl/o0SyOBfsxLiFuOz0cbeThcU8qe5xukK4C9Usu1z7V5h9dMY9y8jKWMNFWOumRjMea1bqS/LEVsUCQ5AmBGWr+AQU="
+
+    # Isaac test deploy GCP_PASSWD encrypted: travis encrypt -r whilei/janus GCP_PASSWD=blahblahblah
+    - secure: "NO3Jo6OOmw5mh3WrAyAhW/eTH4fm/DA12IJrsx5SzIgpjBMiLmIHgsnl6PX2BDfNJcTnQJTuA4EK2jjnD395Fegka83wWoSjc/JQq/+j4pvtPPw6ISeQarDSK/zwxsUbmD08izcZ49kYw6HEeH7R4FVOCCY0wG17gXb3crtc8jfhtgcTZ4GiyehzMZkXLUxq9HugAzUhuDU4YA6bHgI9CUFIUeuMG9koNjMJfiLR7YJrT03wqoEr5JdLaM6qmTsPQ5E/5oru2pePmf4JJKFMWXxfpKyw0AADqmNFrtZ1bFLsGg1gGNZGDDiz6FtwMpKUOhjDKhA7NbAquNRaJGZt0Ic8VqOXz/MxYIezkhrKXAHQWd7Kni4ayZ6xgAxkj6BvQ0jA7rMEk23GS0jCePIROa8cgQyHWkPHpxpT7DL+LtcGKcf8RNzS1OzuoXnPnxloQH/8gmDNTGSkdqhDa/O+ALnNbDMPtq6AY3wjjqCf+IQBM0/jN+mkLnM4ZnFP/Lf6W2JD5KID6v/fSPDgkFodBSstG+g0kAK/91sdmI61GerQHT3wAWIFn7rTdyjsXRfL4av7oSs2NTfmjxPT1ZnCR1PGaCcvR7rzwTr6s9+8t/dQyS50YkQi3tZ+k6lK+jXYT6ynf3i9QuKXBD/DDnHCFAr0gbqmf6snJxxcGXZpLow="
+
+
+script:
+# Run go tests.
+# TODO
+# - go test ./...
+# Set up git-based build version naming.
+# Build.
+- go build -o janus ./main.go
+
+before_deploy:
+- zip janus-$TRAVIS_OS_NAME-$(janus -format "v%M.%m.%P+%C-%S").zip janus
+
+deploy:
+  provider: script
+  script: deploy.sh
+  on:
+    branch: master
+  tags: true
