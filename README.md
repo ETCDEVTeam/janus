@@ -15,6 +15,10 @@ $ mv janus [path/to/project/]
 
 ## Usage
 Janus has two subcomands: `deploy` and `version`.
+#### Example
+This repo is it's own example! See [.travis.yml](https://github.com/ethereumproject/janus/blob/master/.travis.yml) and [deploy.sh](https://github.com/ethereumproject/janus/blob/master/deploy.sh)
+
+
 #### Deploy
 Janus can use an encrypted _or_ decrypted `.json` GCP service key file. In case of an _encrypted_ JSON key file, Janus will attempt to decrypt it using `openssl`,
 and depends on an __environment variable `GCP_PASSWD`__ to be set.
