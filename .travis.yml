@@ -22,12 +22,14 @@ script:
 # Build.
 - go build -o janus ./main.go
 
-before_deploy:
-- zip janus-$TRAVIS_OS_NAME-$(janus -format "v%M.%m.%P+%C-%S").zip janus
+after_success:
+- zip janus-$TRAVIS_OS_NAME-$(./janus version -format v%M.%m.%P+%C-%S).zip janus
+- ls -l ./
 
 deploy:
+  skip_cleanup: true
   provider: script
-  script: deploy.sh
+  script: ./deploy.sh
   on:
     branch: master
   tags: true

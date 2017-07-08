@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"./gcp"
-	"./gitvv"
+	"github.com/ethereumproject/janus/gcp"
+	"github.com/ethereumproject/janus/gitvv"
 )
 
 func main() {
@@ -94,7 +94,7 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 		// -- Will check for existing file(s) to upload, will return error if not exists.
 		if e := gcp.SendToGCP(bucket, object, file, key); e != nil {
 			log.Println("Failed to deploy:")
-			log.Fatal(e)
+			log.Fatalln(e)
 		}
 	} else
 	// Version
