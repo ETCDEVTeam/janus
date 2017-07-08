@@ -153,10 +153,11 @@ func GetVersion(format string) string {
 	sha := getSHA1FromDescription(d)
 	semvers := getSemverFromDescription(d)
 
-	out = strings.Replace(out, "%M", semvers[0], 1)
-	out = strings.Replace(out, "%m", semvers[1], 1)
-	out = strings.Replace(out, "%P", semvers[2], 1)
-	out = strings.Replace(out, "%C", commitCount, 1)
-	out = strings.Replace(out, "%S", sha, 1)
+	// -1 to replace indefinitely. Allows maximum user-decision-making.
+	out = strings.Replace(out, "%M", semvers[0], -1)
+	out = strings.Replace(out, "%m", semvers[1], -1)
+	out = strings.Replace(out, "%P", semvers[2], -1)
+	out = strings.Replace(out, "%C", commitCount, -1)
+	out = strings.Replace(out, "%S", sha, -1)
 	return out
 }
