@@ -42,5 +42,4 @@ deploy:
   provider: script
   script: ./deploy.sh
   on:
-    # We can use tag: true instead to deploy only on tags; it will override branch: xxx setting.
-    branch: master
+    tags: true
