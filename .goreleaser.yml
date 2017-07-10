@@ -17,7 +17,8 @@ release:
   github:
     owner: whilei
     name: janus
-  draft: true
+  # Using draft: true will not build homebrew tap, and does not publish Github release
+  draft: false
 
 brew:
   # Reporitory to push the tap to.
