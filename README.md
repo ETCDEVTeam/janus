@@ -2,7 +2,7 @@ Janus is a reusable tool for versioning and deploying builds to Google Cloud Pro
 environment.
 
 ## Install
-> - [ ] TODO: some slick `curl` command to grab the latest os-specific binary from `janus` releases to use in arbitrary CI
+> - [ ] TODO: `curl` command to grab the latest os-specific binary from `janus` releases to use in arbitrary CI
 
 In the meantime:
 
@@ -14,7 +14,7 @@ $ mv janus [path/to/project/]
 ```
 
 ## Usage
-Janus has two subcomands: `deploy` and `version`.
+Janus has two subcommands: `deploy` and `version`.
 #### Example
 This repo is it's own example! See [.travis.yml](https://github.com/ethereumproject/janus/blob/master/.travis.yml) and [deploy.sh](https://github.com/ethereumproject/janus/blob/master/deploy.sh)
 
@@ -25,15 +25,14 @@ and depends on an __environment variable `GCP_PASSWD`__ to be set.
 
 
 ```shell
-$ janus deploy -bucket builds.etcdevteam.com -object go-ethereum/v3.5.x/geth-linux-xxx.zip -file geth-linux-xxx.zip -key gcloud-service-encrypted-or-decrypted.json
+$ janus deploy -to builds.etcdevteam.com/go-ethereum/v3.5.x/ -files ./dist/*.zip -key gcloud-service-encrypted-or-decrypted.json
 > Deploying...
 ```
 
 | flag | use |
 | --- | --- |
-| `-bucket` | eg `builds.etcdevteam.com`|
-| `-object` | location (path) in which to store uploaded file(s) |
-| `-file` | file(s) to upload |
+| `-to` | eg `builds.etcdevteam.com/go-ethereum/3.5.x`|
+| `-files` | file(s) to upload, can use relative or absolute paths and/or globbing |
 | `-key` | encrypted _or_ decrypted JSON GCP service key file |
 
 
@@ -61,7 +60,6 @@ This makes __previously:__
 - sed -E 's/v([[:digit:]]+\.[[:digit:]]+)\.[[:digit:]]-([[:digit:]]+)-g([a-f0-9]+)/v\1.\2+\3/' version.txt > version-app.txt
 - sed -E 's/v([[:digit:]]+\.[[:digit:]]+)\.[[:digit:]]-([[:digit:]]+).+/v\1.\2/' version.txt > version-only.txt
 - sed -E 's/v([[:digit:]]+\.[[:digit:]]+)\.[[:digit:]]-([[:digit:]]+).+/v\1.x/' version.txt > version-base.txt
-
 ```
 
 __becomes:__
