@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Sources cited:
 # - https://raw.githubusercontent.com/goreleaser/get/master/get
@@ -13,16 +13,17 @@
 set -e
 
 TAR_FILE="/tmp/janus.tar.gz"
-TAR_FILE_SIG="/tmp/janus.sig"
+TAR_FILE_SIG="/tmp/janus.tar.gz.sig"
 DOWNLOAD_URL="https://github.com/ethereumproject/janus/releases/download"
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 
 last_version() {
-  local header
-  test -z "$GITHUB_TOKEN" || header="-H \"Authorization: token $GITHUB_TOKEN\""
-  curl -s $header https://api.github.com/repos/ethereumproject/janus/releases/latest |
-    grep tag_name |
-    cut -f4 -d'"'
+  # local header
+  # # test -z "$GITHUB_TOKEN" || header="-H \"Authorization: token $GITHUB_TOKEN\""
+  # # # curl -s $header https://api.github.com/repos/ethereumproject/janus/releases/latest |
+  #   grep tag_name |
+  #   cut -f4 -d'"'
+  curl -sL -o /dev/null -w %{url_effective} https://github.com/whilei/janus/releases/latest | rev | cut -f1 -d'/'| rev
 }
 
 download() {
@@ -31,14 +32,37 @@ download() {
     echo "Unable to get janus version." >&2
     exit 1
   }
+  echo "Version: $VERSION"
   rm -f "$TAR_FILE"
+  download_target="$DOWNLOAD_URL/$VERSION/janus_${VERSION}_$(uname -s)_$(uname -m).tar.gz"
+  # Check CI for AppVeyor.
+  if [ "$TRAVIS_OS_NAME" = "" ]; then
+          download_target="$DOWNLOAD_URL/$VERSION/janus_${VERSION}_$(uname -s)_$(uname -m).zip"
+  fi
+  echo "Downloading Janus: $download_target"
   curl -s -L -o "$TAR_FILE" \
-    "$DOWNLOAD_URL/$VERSION/janus_$(uname -s)_$(uname -m).tar.gz"
+    "$download_target"
 
   # Get and verify signature.
   rm -f "$TAR_FILE_SIG"
+  sig_target="$DOWNLOAD_URL/$VERSION/janus_${VERSION}_$(uname -s)_$(uname -m).tar.gz.sig"
+  # Check CI for AppVeyor.
+  if [ "$TRAVIS_OS_NAME" = "" ]; then
+          sig_target="$DOWNLOAD_URL/$VERSION/janus_${VERSION}_$(uname -s)_$(uname -m).zip.sig"
+  fi
+  echo "Downloading signature: $sig_target"
   curl -s -L -o "$TAR_FILE_SIG" \
-    "$DOWNLOAD_URL/$VERSION/janus_$(uname -s)_$(uname -m).sig"
+    "$sig_target"
+
+  # Ensure our newly downloaded files exists.
+  if ! [ -f "$TAR_FILE" ]; then
+          echo "Tar file not found."
+          exit 1
+  fi
+  if ! [ -f "$TAR_FILE_SIG" ]; then
+          echo "Tar sig file not found."
+          exit 1
+  fi
 }
 
 verify() {
@@ -66,5 +90,5 @@ install() {
 }
 
 download
-verify
+# verify
 install
