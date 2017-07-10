@@ -27,7 +27,7 @@ func isHash(s string) bool {
 		s = s[1:]
 	}
 	// Must be 0-9 V a-f
-	r := regexp.MustCompile(`\b([^g-z]\w+)\b`)
+	r := regexp.MustCompile(`\b([^g-z\W]\w+)\b`)
 	if r.MatchString(s) {
 		return true
 	}

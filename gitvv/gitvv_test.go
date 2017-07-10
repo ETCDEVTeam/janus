@@ -12,6 +12,7 @@ func Test_isHash(t *testing.T) {
 		{"gasdf123", true},
 		{"gqwer123", false},
 		{"--nope", false},
+		{"v0.1.5", false},
 	}
 
 	for _, tt := range table {
