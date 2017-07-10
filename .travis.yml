@@ -3,8 +3,8 @@ go_import_path: github.com/ethereumproject/janus
 
 go: 1.8
 os:
+# We only need one build OS because goreleaser can build for all OS's.
 - linux
-- osx
 
 env:
   global:
@@ -41,4 +41,5 @@ deploy:
   provider: script
   script: ./deploy.sh
   on:
+    # We can use tag: true instead to deploy only on tags; it will override branch: xxx setting.
     branch: master
