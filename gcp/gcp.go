@@ -3,12 +3,15 @@ package gcp
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
@@ -49,14 +52,15 @@ func writeToGCP(client *storage.Client, bucket, object, file string) error {
 
 // SendToGCP sends a file or files to Google Cloud Provider storage
 // using a service account JSON key
-func SendToGCP(bucket, object, file, key string) error {
-	if _, e := os.Stat(file); e != nil {
-		log.Fatal(file, e)
-	}
+func SendToGCP(to, files, key string) error {
+
+	to = filepath.Clean(to)
+	files = filepath.Clean(files)
+	key = filepath.Clean(key)
 
 	// Ensure key file exists.
 	if _, e := os.Stat(key); e != nil {
-		log.Fatal(file, e)
+		return e
 	}
 
 	var arbitraryMap = make(map[string]interface{})
@@ -74,25 +78,66 @@ func SendToGCP(bucket, object, file, key string) error {
 
 		passwd := os.Getenv("GCP_PASSWD")
 		if passwd == "" {
-			log.Fatalln("env GCP_PASSWD not set, cannot decrypt")
+			return errors.New("env GCP_PASSWD not set, cannot decrypt")
 		}
 		// Assume reading for decoding error is it's encrypted... attempt to decrypt
-		if e := exec.Command("openssl", "aes-256-cbc", "-k", passwd, "-in", key, "-out", decryptedKeyFileName, "-d").Run(); e != nil {
-			log.Fatal("could not parse nor decrypt given key file (please ensure env var GCP_PASSWD is set)", key, e)
+		if decryptError := exec.Command("openssl", "aes-256-cbc", "-k", passwd, "-in", key, "-out", decryptedKeyFileName, "-d").Run(); decryptError != nil {
+			return decryptError
 		}
 
 		log.Println("decrypted key file to ", decryptedKeyFileName)
 		key = decryptedKeyFileName
 
-		defer os.Remove(key) // Only remove *unecrypted* key file
+		// Only remove *unecrypted* key file
+		defer func() {
+			log.Printf("removing key: %v", key)
+			os.Remove(key)
+		}()
 	}
 
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx, option.WithServiceAccountFile(key))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	deployError := writeToGCP(client, bucket, object, file)
-	return deployError
+	// Use glob to get matching file paths.
+	globs, e := filepath.Glob(files)
+	if e != nil {
+		return e
+	}
+	for _, f := range globs {
+		fi, e := os.Stat(f)
+		if e != nil {
+			return e
+		}
+		if fi.IsDir() {
+			log.Printf("%s is a directory, continuing", fi.Name())
+			continue
+		}
+		// eg.
+		// to: builds.etcdevteam.com/go-ethereum/3.5.x
+		// file: ./dist/geth.zip
+		//
+		// Set bucket as first in separator-split path
+		// eg. builds.etcdevteam.com
+		bucket := strings.Split(filepath.ToSlash(to), "/")[0]
+
+		// Get relative path of 'to' based on 'bucket'
+		// eg. go-ethereum/3.5.x
+		object, relError := filepath.Rel(bucket, to)
+		if relError != nil {
+			return relError
+		}
+
+		// Append file to 'to' path.
+		// eg. go-ethereum/3.5.x/geth.zip
+		deployObject := filepath.Join(object, filepath.Base(f))
+
+		// Send it.
+		if deployError := writeToGCP(client, bucket, deployObject, f); deployError != nil {
+			return deployError
+		}
+	}
+	return nil
 }

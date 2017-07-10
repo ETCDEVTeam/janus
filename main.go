@@ -17,17 +17,27 @@ func main() {
 	versionCommand := flag.NewFlagSet("version", flag.ExitOnError)
 
 	// Deploy flags
-	var key, file, bucket, object string
+	var key, files, to string
 	// Version flags
 	var format string
 
 	// Set up flags.
 	//
 	// Deploy
-	deployCommand.StringVar(&bucket, "bucket", "", "gcp bucket name")
-	deployCommand.StringVar(&object, "object", "", "gcp object path")
-	deployCommand.StringVar(&file, "file", "", "file to upload")
-	deployCommand.StringVar(&key, "key", "", "service account json key file")
+	deployCommand.StringVar(&to, "to", "", `directory path to deploy files to
+
+the first directory in the given path is GCP <bucket>
+files will be uploaded INTO this path
+
+eg.
+-to=builds.etcdevteam.com/go-ethereum/releases/v3.5.x \
+-files=./dist/*.zip [eg. ./dist/geth-linux.zip, ./dist/geth-osx.zip]
+
+--> builds.etcdevteam.com/go-ethereum/releases/v3.5.x/geth-linux.zip
+--> builds.etcdevteam.com/go-ethereum/releases/v3.5.x/geth-osx.zip
+`)
+	deployCommand.StringVar(&files, "files", "", "file(s) to upload, allows globbing")
+	deployCommand.StringVar(&key, "key", "", "service account json key file, may be encrypted OR decrypted")
 	// Version
 	versionCommand.StringVar(&format, "format", "", `format of git version:
 
@@ -42,7 +52,7 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 
 	flag.Usage = func() {
 		log.Println("Usage for Janus:")
-		log.Println("  $ janus deploy -bucket builds.etcdevteam.com -object go-ethereum/version/file -file geth.zip -key .gcloud.json")
+		log.Println("  $ janus deploy -to builds.etcdevteam.com/go-ethereum/version -file geth.zip -key .gcloud.json")
 		log.Println("  $ janus version -format 'v%M.%m.%P+%C-%S'")
 		flag.PrintDefaults()
 	}
@@ -69,18 +79,13 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 	// Deploy
 	if deployCommand.Parsed() {
 		// Ensure required flags are set.
-		if bucket == "" {
-			log.Println("--bucket requires an argument")
+		if to == "" {
+			log.Println("--to requires an argument")
 			flag.Usage()
 			os.Exit(1)
 		}
-		if file == "" {
-			log.Println("--file requires an argument")
-			flag.Usage()
-			os.Exit(1)
-		}
-		if object == "" {
-			log.Println("--object requires an argument")
+		if files == "" {
+			log.Println("--files requires an argument")
 			flag.Usage()
 			os.Exit(1)
 		}
@@ -92,7 +97,7 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 
 		// Handle deploy.
 		// -- Will check for existing file(s) to upload, will return error if not exists.
-		if e := gcp.SendToGCP(bucket, object, file, key); e != nil {
+		if e := gcp.SendToGCP(to, files, key); e != nil {
 			log.Println("Failed to deploy:")
 			log.Fatalln(e)
 		}
