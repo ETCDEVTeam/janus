@@ -106,6 +106,11 @@ func SendToGCP(to, files, key string) error {
 	if e != nil {
 		return e
 	}
+	// Ensure there is something to upload
+	if len(globs) == 0 {
+		return errors.New("no files matching '-to' pattern were found")
+	}
+	// Upload each file
 	for _, f := range globs {
 		fi, e := os.Stat(f)
 		if e != nil {
