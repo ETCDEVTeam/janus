@@ -29,8 +29,7 @@ after_success:
 - ls -l ./
 
 # Go releaser to build binaries and deploy to Github
-# Only do it on OSX (no need to duplicate release on linux build, too).
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash; fi
+- test -n "$TRAVIS_TAG" && curl -sL https://git.io/goreleaser | bash
 
 # Proof-of-concept deploying to Isaac test GCP storage.
 # I expect for Janus herself, there will be no need for this and we can just use goreleaser,
@@ -40,5 +39,4 @@ deploy:
   provider: script
   script: ./deploy.sh
   on:
-    branch: master
-  tags: true
+    tags: true
