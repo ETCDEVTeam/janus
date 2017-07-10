@@ -25,7 +25,9 @@ script:
 after_success:
 # Proof-of-concept for using janus to version herself.
 - go install
-- zip janus-$TRAVIS_OS_NAME-$(janus version -format v%M.%m.%P+%C-%S).zip janus
+- echo "$(which janus)" # Prove janus is installed
+# Zip project janus for proof-of-concept deploy
+- zip janus-$TRAVIS_OS_NAME-$(janus version -format v%M.%m.%P+%C-%S).zip ./janus
 - ls -l ./
 
 # Go releaser to build binaries and deploy to Github

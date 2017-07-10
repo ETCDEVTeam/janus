@@ -1,5 +1,6 @@
 builds:
-  - binary: janus
+  - main: main.go
+    binary: janus
     goos:
       - windows
       - darwin
@@ -15,7 +16,7 @@ archive:
 release:
   github:
     owner: whilei
-    repo: janus
+    name: janus
   draft: true
 
 brew:
