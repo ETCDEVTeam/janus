@@ -8,6 +8,7 @@
 # Install janus executable to system PATH.
 #
 # curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+# export PATH=$PATH:$PWD/janusbin
 
 set -e
 
@@ -68,19 +69,16 @@ verify() {
 }
 
 install() {
-  # Extract to CWD
-  tar -xvf "$TAR_FILE"
-  # Show CWD
-  ls -l ./
+  echo "Extracting janus..."
+  tar -xf "$TAR_FILE"
+
+  echo "Moving 'janus' binary to ./janusbin/janus"
   mkdir janusbin
   mv janus janusbin/
-  # Add to PATH
-  # Note that when you’re updating the $PATH environment variable,
-  # that part can’t be moved into a shell script, as it will only update the variable
-  # for the sub-process that’s running the script.
-  # export PATH=$PATH:$PWD/janusbin
-  # echo "PATH -> $PATH"
-  # echo "Janus installed to: $(which janus)"
+
+  echo "Please ensure janus is added to PATH."
+  echo "Use:"
+  echo " - export PATH=$PATH:$PWD/janusbin"
 }
 
 download
