@@ -75,9 +75,12 @@ install() {
   mkdir janusbin
   mv janus janusbin/
   # Add to PATH
-  export PATH=$PATH:$PWD/janusbin
-  echo "PATH -> $PATH"
-  echo "Janus installed to: $(which janus)"
+  # Note that when you’re updating the $PATH environment variable,
+  # that part can’t be moved into a shell script, as it will only update the variable
+  # for the sub-process that’s running the script.
+  # export PATH=$PATH:$PWD/janusbin
+  # echo "PATH -> $PATH"
+  # echo "Janus installed to: $(which janus)"
 }
 
 download
