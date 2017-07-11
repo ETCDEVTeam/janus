@@ -74,8 +74,6 @@ install() {
   ls -l ./
   mkdir janusbin
   mv janus janusbin/
-  # Ensure executable
-  chmod +x $PWD/janus
   # Add to PATH
   export PATH=$PATH:$PWD/janusbin
   echo "PATH -> $PATH"
