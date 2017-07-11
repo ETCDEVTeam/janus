@@ -13,6 +13,8 @@ set -e
 
 TAR_FILE="/tmp/janus.tar.gz"
 TAR_FILE_SIG="/tmp/janus.tar.gz.sig"
+ISAAC_GPG_FILE="/tmp/isaac-gpg.txt"
+ISAAC_GPG_URL="https://raw.githubusercontent.com/ethereumproject/volunteer/master/Volunteer-Public-Keys/isaac.ardis%40gmail.com"
 # It's really annoying that we (have to?) do this Windows workaround.
 if [ "$TRAVIS_OS_NAME" = "" ]; then
         TAR_FILE_SIG="/tmp/janus.zip.sig"
@@ -21,12 +23,6 @@ DOWNLOAD_URL="https://github.com/ethereumproject/janus/releases/download"
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 
 last_version() {
-  # local header
-  # # test -z "$GITHUB_TOKEN" || header="-H \"Authorization: token $GITHUB_TOKEN\""
-  # # # curl -s $header https://api.github.com/repos/ethereumproject/janus/releases/latest |
-  #   grep tag_name |
-  #   cut -f4 -d'"'
-
   # The new and improved sans-GithubAPI-rate-limited curler.
   # https://github.com/goreleaser/goreleaser/issues/157
   curl -sL -o /dev/null -w %{url_effective} https://github.com/ethereumproject/janus/releases/latest | rev | cut -f1 -d'/'| rev
@@ -75,14 +71,19 @@ download() {
 # not happy about it.
 verify() {
   # Ensure we have GPG software
-  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
     brew install gpg2
-  elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+  elif [ "$TRAVIS_OS_NAME" = "linux" ]; then
     sudo apt-get install gnupg2
     # TODO: Windows appveyor
     # How great would it be if the CIs came with gpg2 pre-installed. Really great.
   fi
 
+  # Get public key used for signing release.
+  curl -s -L -o "$ISAAC_GPG_FILE" \
+    "$ISAAC_GPG_URL"
+
+  gpg --import "$ISAAC_GPG_FILE"
   gpg --verify "$TAR_FILE_SIG" "$TAR_FILE"
 }
 
@@ -91,7 +92,7 @@ install() {
   # Ensure executable
   chmod +x "${TMPDIR}/janus"
   # Add to PATH
-  if [[ "$TRAVIS_OS_NAME" != "" ]]; then
+  if ! [ "$TRAVIS_OS_NAME" = "" ]; then
     export PATH=$PATH:"${TMPDIR}/janus"
   else
     set /p PATH=%PATH%;"${TMPDIR}/janus"
