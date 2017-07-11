@@ -72,7 +72,7 @@ install() {
   # Ensure executable
   chmod +x "${TMPDIR}/janus"
   # Add to PATH
-  mv "$TMPDIR/janus" "$HOME/bin/"
+  mv "$TMPDIR/janus" "/usr/bin/"
 }
 
 download
