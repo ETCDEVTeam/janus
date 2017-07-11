@@ -25,7 +25,7 @@ archive:
 
 release:
   github:
-    owner: whilei
+    owner: ethereumproject
     name: janus
   # Using draft: true will not build homebrew tap, and does not publish Github release
   draft: false
@@ -33,7 +33,7 @@ release:
 brew:
   # Reporitory to push the tap to.
   github:
-    owner: whilei
+    owner: ethereumproject
     name: janus
 
   # Folder inside the repository to put the formula.
