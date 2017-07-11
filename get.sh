@@ -67,24 +67,16 @@ download() {
   fi
 }
 
-# TODO: we may have to download my/someone's signature to use --verify
-# not happy about it.
 verify() {
-  # Ensure we have GPG software
-  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    brew install gpg2
-  elif [ "$TRAVIS_OS_NAME" = "linux" ]; then
-    sudo apt-get install gnupg2
-    # TODO: Windows appveyor
-    # How great would it be if the CIs came with gpg2 pre-installed. Really great.
+  # Verify signature if gpg is available.
+  if hash gpg 2> /dev/null; then
+          curl -s -L -o "$ISAAC_GPG_FILE" \
+            "$ISAAC_GPG_URL"
+
+          gpg --import "$ISAAC_GPG_FILE"
+          gpg --verify "$TAR_FILE_SIG" "$TAR_FILE"
   fi
-
   # Get public key used for signing release.
-  curl -s -L -o "$ISAAC_GPG_FILE" \
-    "$ISAAC_GPG_URL"
-
-  gpg --import "$ISAAC_GPG_FILE"
-  gpg --verify "$TAR_FILE_SIG" "$TAR_FILE"
 }
 
 install() {
