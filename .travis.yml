@@ -10,26 +10,25 @@ env:
   global:
     # - secure: "MjvfqrKakMa+z+6LFxaL30n+BtjxUm2BnJ6/+S5cbxoCcXGVUBQf9LZ7+FbxIiucZqe7LoawPfLfrzyYPH9Lf03o+gUAdqV2Mm9EYVh5cbF51DmhcRL36Pubm4BeR2DdZTk/v31/TN9g/D9/rsCCwpwFuQB4iuBwYLtyJi8JLopVLpw7/ZI/8EYkOAE/3L0t4ICOMYexKGGi8XkVCC0TWBAHbzFYfeRJxspDNP2WhLS3vJdqDoJKFi/p/ZFzn2J4GKP6hhSUWzG57MpshhYcnIFzt4ZgB1sa1gNF04fe0gT+qAP9WuMFuUPgKhAN/bIPy78BfUi3ScJVYMj6y5D9PzN5+Kp3bo0SsXf6tAJ4t8m8IfU7FBpZkctMxP5aqvu/WX+eHgjNhVkHseZmRO/kst1YfXa5cjjAbiXwivRFtIv7LTrlpshB06k6zj9kD1JngOjf9sLnyYv38Njy/Vb1rK2kkPGMGzLDfkxxmrVgbijfvxX1Hidn97X/y6iLZvq14XsycoWFetiH67OT81grL1hpYC2HyTIdVrG/8CT1FtHsRKa4DqGiWAlaQf8ksm/TPGczylZbtEXFqDLuVl/o0SyOBfsxLiFuOz0cbeThcU8qe5xukK4C9Usu1z7V5h9dMY9y8jKWMNFWOumRjMea1bqS/LEVsUCQ5AmBGWr+AQU="
 
-    # Isaac test deploy GCP_PASSWD encrypted: travis encrypt -r whilei/janus GCP_PASSWD=blahblahblah GITHUB_TOKEN=asdfasdf123123
-    # TODO: replace me
+    # Isaac deploy GCP_PASSWD encrypted: travis encrypt -r whilei/janus GCP_PASSWD=blahblahblah GITHUB_TOKEN=asdfasdf123123
+    # GCP_PASSWD used for proof-of-concept Janus deploys
+    # GITHUB_TOKEN used for goreleaser to release Janus to github on tags
     - secure: "lN+I2//q+qMI79GKN+3lzgABDGxT2xrW892Rbezq+6QHcRafh2yxRXjhcYS9FMkoWfvrFe61PIwEYw8jkU0KcguBCRTgyUVmoDYHNUgRFwzn/yp0LLEA4LrLfO5AcX85ymCJ/6kJCRZVmLbDhdB1456E00VvH7VRAxYd7BzCSfm4/ZI7Ou7Nj2Bi5DrBnli9IG9ioWfmNBqNVtDDlcZsW3WYxJW51KsCSCnyYp2oIL2u+7IQH2axW6u/E80TgVkEwJfwxw5npuzM1qKS3K156932Zmavg3Rb53jNbxrqDrlUSvE/wBBdhNRd9/5RRL6yuNp5OIUxcCPTe+D53+GN8J6PczOLxhHmKm+KvHNNH+Rifd4tzPmGpSnhlKYMN+wDU01K56xDOa1boRyww3jxaDXG64l/xcOE8Jp0tPDICUyeZ6tAO04+9GFvOfnfQtWTC4MRtJ3l2EhFzOY+CdlZcDS0TFYmRiUWGkELdEvl0xPuSlSf6yEqxB91rjJVASwg2ggATH4eFzRWf5/K8S1mAmcQrUQ0B5bhM1D3PFRBV4gGlKqvHFsxrSZ4pKQt9eNP9SV8UCXEE5N+1Lz45tREae4bdtSIl+zdJa4MggPq/1FlO4Oco35qd8PAG55oN/AY8Ztl7N+A33I4nhsR+BR39XwRyFXGijSwpSyA+hnmlDk="
 
 
 script:
-# TODO
 # Run go tests.
-# - go test ./...
 - go test -v ./...
 
 after_success:
 # Proof-of-concept for using janus to version herself.
-- go install
-- echo "$(which janus)" # Prove janus is installed
+# - go install
+# - echo "$(which janus)" # Prove janus is installed
 
 # Zip project janus for proof-of-concept deploy
-- go build -o janus ./main.go
-- zip janus-$TRAVIS_OS_NAME-$(janus version -format v%M.%m.%P+%C-%S).zip ./janus
-- ls -l ./
+# - go build -o janus ./main.go
+# - zip janus-$TRAVIS_OS_NAME-$(janus version -format v%M.%m.%P+%C-%S).zip ./janus
+# - ls -l ./
 
 # Go releaser to build binaries and deploy to Github
 - curl -sL https://git.io/goreleaser | bash
@@ -37,9 +36,9 @@ after_success:
 # Proof-of-concept deploying to Isaac test GCP storage.
 # I expect for Janus herself, there will be no need for this and we can just use goreleaser,
 # along with a very similar script as above for other projects.
-deploy:
-  skip_cleanup: true
-  provider: script
-  script: ./deploy.sh
-  on:
-    tags: true
+# deploy:
+#   skip_cleanup: true
+#   provider: script
+#   script: ./deploy.sh
+#   on:
+#     tags: true
