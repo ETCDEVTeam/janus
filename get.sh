@@ -89,6 +89,8 @@ install() {
   else
     set /p PATH=%PATH%;"${TMPDIR}/janus"
   fi
+  echo "$PATH"
+  ls -l /tmp/
 }
 
 download
