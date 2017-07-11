@@ -2,12 +2,12 @@ Janus is a reusable tool for versioning and deploying builds to Google Cloud Pro
 environment.
 
 ## Install
-Janus is designed for use in the CI environment.
 
 #### Requirements:
 - [ ] encrypted JSON GCP service account key, with access to GCP _Storage_ feature
 - [ ] CI environment variable `GCP_PASSWD` to be set, either via secure global (as below), or via CI GUI interface
-- [ ] having Janus installed (as below), via `curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash`
+- [ ] having Janus installed (as below), via `curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash`, and then exporting her to the CI `PATH`
+- [ ] in order to verify the janus archive `gpg` must be available in the system. `gpg` is standard on Travis.
 
 _eg_
 ```yml
@@ -21,14 +21,29 @@ env:
 
 before_deploy:
   # Install Janus
-  # This should work for Travis (OSX and Linux) and AppVeyor (Windows) environments.
   - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+
+  # Add janus to PATH, this is *required*.
+  #   Gotcha: This has to happen outside the 'get' script, otherwise PATH will only be set for
+  #   the script subprocess.
+  - export PATH=$PATH:$PWD/janusbin
 
   # Prepare file(s) to deploy.
   - zip emerald-"$TRAVIS_OS_NAME"-$(janus version -format v%M.%m.%P+%C-%S).zip emerald-cli
 
-  # Ship it.
-  - janus deploy -to builds.etcdevteam.com/emerald/$(janus version -format v%M.%m.x) -files ./*.zip -key gcloud-travis.enc.json
+deploy:
+  # Note that it's important to skip cleanup if you want to deploy builds generated during a previous process
+  skip_cleanup: true
+  provider: script
+  # Note that if you want to use a stand-alone script, you can use the follow syntax.
+  #   Gotcha: on Travis you *must* use the relative path execution syntax ('./')
+  # script: ./deploy.sh
+  script:
+      # Note that decrypting the GCP service key requires GCP_PASSWD environment variable to be set (see above).
+      - janus deploy -to "builds.etcdevteam.com/project/$(janus version -format %M.%m.x)" -files "*.zip-key gcp-key.enc.json
+  on:
+    branch: master
+  tags: true
 ```
 
 ## Usage
@@ -64,7 +79,7 @@ $ janus version -format v%M.%m.%P+%C-%S
 %m - minor version
 %P - patch version
 %C - commit count since last tag
-%S - HEAD sha1
+%S - HEAD sha1 (first 7 characters)
 ```
 
 So this:
