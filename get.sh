@@ -9,11 +9,14 @@
 #
 # curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
 
-
 set -e
 
 TAR_FILE="/tmp/janus.tar.gz"
 TAR_FILE_SIG="/tmp/janus.tar.gz.sig"
+# It's really annoying that we (have to?) do this Windows workaround.
+if [ "$TRAVIS_OS_NAME" = "" ]; then
+        TAR_FILE_SIG="/tmp/janus.zip.sig"
+fi
 DOWNLOAD_URL="https://github.com/ethereumproject/janus/releases/download"
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 
@@ -23,7 +26,10 @@ last_version() {
   # # # curl -s $header https://api.github.com/repos/ethereumproject/janus/releases/latest |
   #   grep tag_name |
   #   cut -f4 -d'"'
-  curl -sL -o /dev/null -w %{url_effective} https://github.com/whilei/janus/releases/latest | rev | cut -f1 -d'/'| rev
+
+  # The new and improved sans-GithubAPI-rate-limited curler.
+  # https://github.com/goreleaser/goreleaser/issues/157
+  curl -sL -o /dev/null -w %{url_effective} https://github.com/ethereumproject/janus/releases/latest | rev | cut -f1 -d'/'| rev
 }
 
 download() {
@@ -65,6 +71,8 @@ download() {
   fi
 }
 
+# TODO: we may have to download my/someone's signature to use --verify
+# not happy about it.
 verify() {
   # Ensure we have GPG software
   if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -72,6 +80,7 @@ verify() {
   elif [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     sudo apt-get install gnupg2
     # TODO: Windows appveyor
+    # How great would it be if the CIs came with gpg2 pre-installed. Really great.
   fi
 
   gpg --verify "$TAR_FILE_SIG" "$TAR_FILE"
@@ -90,5 +99,5 @@ install() {
 }
 
 download
-# verify
+verify
 install
