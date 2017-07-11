@@ -30,16 +30,16 @@ release:
   # Using draft: true will not build homebrew tap, and does not publish Github release
   draft: false
 
-brew:
-  # Reporitory to push the tap to.
-  github:
-    owner: ethereumproject
-    name: janus
-
-  # Folder inside the repository to put the formula.
-  # Default is the root folder.
-  folder: Formula
-
-  # Your app's description
-  # Default is empty
-  description: "Shared CI deployer + version syntax tool for ETCDEV"
+# brew:
+#   # Reporitory to push the tap to.
+#   github:
+#     owner: ethereumproject
+#     name: janus
+#
+#   # Folder inside the repository to put the formula.
+#   # Default is the root folder.
+#   folder: Formula
+#
+#   # Your app's description
+#   # Default is empty
+#   description: "Shared CI deployer + version syntax tool for ETCDEV"
