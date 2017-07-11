@@ -68,11 +68,11 @@ verify() {
 }
 
 install() {
-  tar -xf "$TAR_FILE" -C "$TMPDIR"
+  tar -xvf "$TAR_FILE"
   # Ensure executable
-  chmod +x "${TMPDIR}/janus"
+  chmod +x $PWD/janus
   # Add to PATH
-  PATH=$PATH:"$TMPDIR/janus"
+  export PATH=$PATH:$PWD/janus
 }
 
 download
