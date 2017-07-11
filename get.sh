@@ -69,7 +69,8 @@ download() {
 
 verify() {
   # Verify signature if gpg is available.
-  if hash gpg 2> /dev/null; then
+  if command -v gpg 2> /dev/null; then
+          echo "Downloading Isaac's key file: $ISAAC_GPG_URL"
           curl -s -L -o "$ISAAC_GPG_FILE" \
             "$ISAAC_GPG_URL"
 
