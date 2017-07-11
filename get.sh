@@ -68,15 +68,20 @@ verify() {
 }
 
 install() {
+  # Extract to CWD
   tar -xvf "$TAR_FILE"
+  # Show CWD
+  ls -l ./
+  mkdir janusbin
+  mv janus janusbin/
   # Ensure executable
   chmod +x $PWD/janus
   # Add to PATH
-  export PATH=$PATH:$PWD/janus
+  export PATH=$PATH:$PWD/janusbin
+  echo "PATH -> $PATH"
+  echo "Janus installed to: $(which janus)"
 }
 
 download
 verify
 install
-
-echo "Janus installed to: $(which janus)"
