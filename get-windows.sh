@@ -11,8 +11,8 @@
 
 set -e
 
-TAR_FILE="/tmp/janus.tar.gz"
-TAR_FILE_SIG="/tmp/janus.tar.gz.sig"
+TAR_FILE="/tmp/janus.zip"
+TAR_FILE_SIG="/tmp/janus.zip.sig"
 ISAAC_GPG_FILE="/tmp/isaac-gpg.txt"
 ISAAC_GPG_URL="https://raw.githubusercontent.com/ethereumproject/volunteer/master/Volunteer-Public-Keys/isaac.ardis%40gmail.com"
 DOWNLOAD_URL="https://github.com/ethereumproject/janus/releases/download"
@@ -32,14 +32,14 @@ download() {
   }
   echo "Version: $VERSION"
   rm -f "$TAR_FILE"
-  download_target="$DOWNLOAD_URL/$VERSION/janus_${VERSION}_$(uname -s)_$(uname -m).tar.gz"
+  download_target="$DOWNLOAD_URL/$VERSION/janus_${VERSION}_$(uname -s)_$(uname -m).zip"
   echo "Downloading Janus: $download_target"
   curl -s -L -o "$TAR_FILE" \
     "$download_target"
 
   # Get and verify signature.
   rm -f "$TAR_FILE_SIG"
-  sig_target="$DOWNLOAD_URL/$VERSION/janus_${VERSION}_$(uname -s)_$(uname -m).tar.gz.sig"
+  sig_target="$DOWNLOAD_URL/$VERSION/janus_${VERSION}_$(uname -s)_$(uname -m).zip.sig"
   echo "Downloading signature: $sig_target"
   curl -s -L -o "$TAR_FILE_SIG" \
     "$sig_target"
@@ -72,7 +72,7 @@ install() {
   # Ensure executable
   chmod +x "${TMPDIR}/janus"
   # Add to PATH
-  mv "$TMPDIR/janus" "$HOME/bin/"
+  mv "$TMPDIR/janus" "%HOME%/bin/"
 }
 
 download
