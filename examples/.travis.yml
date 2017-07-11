@@ -1,0 +1,46 @@
+language: go
+go_import_path: github.com/ethereumproject/janus
+
+go: 1.8
+os:
+- linux
+
+env:
+  global:
+    # Set GCP_PASSWD environment variable. This is required to decrypt the GCP Service Account key for deploy.
+    # travis encrypt -r ethereumproject/repo-name GCP_PASSWD=supersecret
+    - secure: "MKhc0c07V1z75sGJuZl19lM2Mj5hIXuM5DxTI1hLxz0kfOel/TZSf4557ip5Mp0MRKkgXeTlP6bJQX3taVONVTT8ZFwj9m2gbiYYuOubx5mf17Fa2YwYmQ9G7HRmMvge6ypeI1uibyOv2fUNhIMeMLhuFTgkV1pw1R/oeXTD8U7TivgYTXy8/6iDf66NPpXWZNwJ0d5GfSybiT31gglubiC9ehnmDNIgDYRlO8vr7TdB9eTkX6gEiEhdvyLBu+ljLN2VznvTQoCsByq6yUPNSKDbTodcYXfugtWpksqnsSoinlGhVAMJE2jCT71gdeMHzIgo4xYxEB6GqfbnOot5knlgBmQo7tlPHD7gfCYfdB7WWKJW9lmUAGVwpWQup+rBLbuVhKvjgeevZy/5JkGghoiPh6Mw9txy/zmTS+QwlTA9m+blZcqAksNcT0TE68dGXxpvhzI+WDu3XjhQE31VWG7daw9QyZHlhkma2xCmM1zDHvpbiyPlTSAWQyUU2TgVOs4fIlMYbV/NSkB4zWz4TvhqJHv2AtFtXw9y+xoBgd2GidKR7YtAjjBOPjb+KmyZ470nwdmoe7tCZM6Y0FLlkeVjKRxS0sD2DOheZX/gzdsQt2L8XIzjCdcp2QhV1/h5WEQop9Lm1FO/bGco/2525l2ExR7AW8Phz7ot+/mpvQA="
+
+script:
+# Run tests and builds.
+- go test -v ./...
+- go build -o janus main.go
+
+before_deploy:
+  # Get janus.
+  - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+  # Add janus to PATH, this is *required*.
+  #   This has to happen outside the 'get' script, otherwise PATH will only be set for
+  #   the script subprocess.
+  - export PATH=$PATH:$PWD/janusbin
+  # Use janus to name the archive version of the build.
+  #   %M - semver: major version
+  #   %m - semver: minor version
+  #   %P - semver: patch version
+  #   %C - commit count since last tag
+  #   %S - HEAD commit SHA1 with length 7, eg. abcd123
+  - zip ourrelease-$(janus version -format v%M.%m.%P+%C-%S).zip ourrelease-bin
+
+deploy:
+  # Note that it's important to skip cleanup if you want to deploy builds generated during a previous process
+  skip_cleanup: true
+  provider: script
+  # Note that if you want to use a stand-alone script, you can use the follow syntax.
+  #   Gotcha: on Travis you *must* use the relative path execution syntax ('./')
+  # script: ./deploy.sh
+  script:
+    # Note that decrypting the GCP service key requires GCP_PASSWD environment variable to be set (see above).
+    - janus deploy -to "builds.etcdevteam.com/project/$(janus version -format %M.%m.x)" -files "*.zip" -key gcp-key.enc.json
+  on:
+    branch: master
+  tags: true
