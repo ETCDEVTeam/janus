@@ -55,9 +55,9 @@ and depends on an __environment variable `GCP_PASSWD`__ to be set. After success
 
 | flag | example | description |
 | --- | --- | --- |
-| `-to` | `builds.etcdevteam.com/go-ethereum/3.5.x`| __<bucket>__/<path/to/hold/file(s)> |
+| `-to` | `builds.etcdevteam.com/go-ethereum/3.5.x`| __builds.etcdevteam.com__/path/to/hold/the/file(s) |
 | `-files` | `./dist/*.zip` | file(s) to upload, can use relative or absolute path and/or wildcard globbing |
-| `-key` | `./gcloud-travis.enc.json` |encrypted _or_ decrypted JSON GCP service key file |
+| `-key` | `./gcloud-travis.enc.json` | encrypted _or_ decrypted JSON GCP service key file |
 
 ```shell
 $ janus deploy -to builds.etcdevteam.com/go-ethereum/v3.5.x/ -files ./dist/*.zip -key gcloud-service-encrypted-or-decrypted.json
