@@ -9,7 +9,7 @@ environment.
 - [ ] having Janus installed (as below), via `curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash`, and then exporting her to the CI `PATH`
 - [ ] in order to verify the janus archive `gpg` must be available in the system. `gpg` is standard on Travis.
 
-_eg_
+#### Example
 ```yml
 # .travis.yml
 env:
