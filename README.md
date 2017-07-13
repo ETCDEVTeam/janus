@@ -9,43 +9,6 @@ environment.
 - [ ] having Janus installed (as below), via `curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash`, and then exporting her to the CI `PATH`
 - [ ] in order to verify the janus archive `gpg` must be available in the system. `gpg` is standard on Travis.
 
-#### Example
-```yml
-# .travis.yml
-env:
-  global:
-    # This value should hold at least environment variable GCP_PASSWD=xxx in order to decrypt the GCP service account key that Janus relies on.
-    # eg.
-    # $ travis encrypt -r ethereumproject/emerald-rs GCP_PASSWD=asdfasdfasdfasdfasdf
-    - secure: "MjvfqrKakMa+z+6LFxaL30n+BtjxUm2BnJ6/+S5cbxo"
-
-before_deploy:
-  # Install Janus
-  - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
-
-  # Add janus to PATH, this is *required*.
-  #   Gotcha: This has to happen outside the 'get' script, otherwise PATH will only be set for
-  #   the script subprocess.
-  - export PATH=$PATH:$PWD/janusbin
-
-  # Prepare file(s) to deploy.
-  - zip emerald-"$TRAVIS_OS_NAME"-$(janus version -format v%M.%m.%P+%C-%S).zip emerald-cli
-
-deploy:
-  # Note that it's important to skip cleanup if you want to deploy builds generated during a previous process
-  skip_cleanup: true
-  provider: script
-  # Note that if you want to use a stand-alone script, you can use the follow syntax.
-  #   Gotcha: on Travis you *must* use the relative path execution syntax ('./')
-  # script: ./deploy.sh
-  script:
-      # Note that decrypting the GCP service key requires GCP_PASSWD environment variable to be set (see above).
-      - janus deploy -to "builds.etcdevteam.com/project/$(janus version -format %M.%m.x)" -files "*.zip-key gcp-key.enc.json
-  on:
-    branch: master
-  tags: true
-```
-
 ## Usage
 Janus has two subcommands: `deploy` and `version`.
 
@@ -97,8 +60,43 @@ replaces this:
 - sed -E 's/v([[:digit:]]+\.[[:digit:]]+)\.[[:digit:]]-([[:digit:]]+).+/v\1.x/' version.txt > version-base.txt
 ```
 
-#### Example
-This repo is it's own example! See [.travis.yml](https://github.com/ethereumproject/janus/blob/master/.travis.yml) and [deploy.sh](https://github.com/ethereumproject/janus/blob/master/deploy.sh)
+## Example
+```yml
+# .travis.yml
+env:
+  global:
+    # This value should hold at least environment variable GCP_PASSWD=xxx in order to decrypt the GCP service account key that Janus relies on.
+    # eg.
+    # $ travis encrypt -r ethereumproject/emerald-rs GCP_PASSWD=asdfasdfasdfasdfasdf
+    - secure: "MjvfqrKakMa+z+6LFxaL30n+BtjxUm2BnJ6/+S5cbxo"
+
+before_deploy:
+  # Install Janus
+  - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+
+  # Add janus to PATH, this is *required*.
+  #   Gotcha: This has to happen outside the 'get' script, otherwise PATH will only be set for
+  #   the script subprocess.
+  - export PATH=$PATH:$PWD/janusbin
+
+  # Prepare file(s) to deploy.
+  - zip emerald-"$TRAVIS_OS_NAME"-$(janus version -format v%M.%m.%P+%C-%S).zip emerald-cli
+
+deploy:
+  # Note that it's important to skip cleanup if you want to deploy builds generated during a previous process
+  skip_cleanup: true
+  provider: script
+  # Note that if you want to use a stand-alone script, you can use the follow syntax.
+  #   Gotcha: on Travis you *must* use the relative path execution syntax ('./')
+  # script: ./deploy.sh
+  script:
+      # Note that decrypting the GCP service key requires GCP_PASSWD environment variable to be set (see above).
+      - janus deploy -to "builds.etcdevteam.com/project/$(janus version -format %M.%m.x)" -files "*.zip-key gcp-key.enc.json
+  on:
+    branch: master
+  tags: true
+```
+
 
 ----
 
