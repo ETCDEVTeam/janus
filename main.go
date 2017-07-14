@@ -101,6 +101,7 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 			log.Println("Failed to deploy:")
 			log.Fatalln(e)
 		}
+		os.Exit(0)
 	} else
 	// Version
 	if versionCommand.Parsed() {

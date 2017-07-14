@@ -91,7 +91,9 @@ func SendToGCP(to, files, key string) error {
 		// Only remove *unecrypted* key file
 		defer func() {
 			log.Printf("removing key: %v", key)
-			os.Remove(key)
+			if errRm := os.Remove(key); errRm != nil {
+				log.Println(errRm)
+			}
 		}()
 	}
 
