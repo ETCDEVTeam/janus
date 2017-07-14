@@ -138,6 +138,9 @@ func SendToGCP(to, files, key string) error {
 		// Append file to 'to' path.
 		// eg. go-ethereum/3.5.x/geth.zip
 		deployObject := filepath.Join(object, filepath.Base(f))
+		// Ensure actual '/' [slash]es are used, because Windows will make them '\' [backslashes]
+		// and google won't folder-ize the path
+		deployObject = filepath.ToSlash(deployObject)
 
 		// Send it.
 		if deployError := writeToGCP(client, bucket, deployObject, f); deployError != nil {
