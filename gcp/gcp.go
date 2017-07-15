@@ -46,7 +46,7 @@ func writeToGCP(client *storage.Client, bucket, object, file string) error {
 	fmt.Printf(`Successfully uploaded:
 	bucket: %v
 	object: %v
-	file: %v`, bucket, object, file)
+	file: %v\n`, bucket, object, file)
 	return nil
 }
 
@@ -98,7 +98,7 @@ func SendToGCP(to, files, key string) error {
 				key = p
 			}
 
-			fmt.Printf("removing key: %v", key)
+			fmt.Printf("removing key: %v\n", key)
 			if errRm := os.Remove(key); errRm != nil {
 				fmt.Println(errRm)
 			}
