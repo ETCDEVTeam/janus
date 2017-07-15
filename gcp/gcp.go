@@ -46,7 +46,8 @@ func writeToGCP(client *storage.Client, bucket, object, file string) error {
 	fmt.Printf(`Successfully uploaded:
 	bucket: %v
 	object: %v
-	file: %v\n`, bucket, object, file)
+	file: %v
+	`, bucket, object, file)
 	return nil
 }
 
@@ -85,7 +86,7 @@ func SendToGCP(to, files, key string) error {
 			return decryptError
 		}
 
-		fmt.Println("decrypted key file to ", decryptedKeyFileName)
+		fmt.Println("decrypted key file to: ", decryptedKeyFileName)
 		key = decryptedKeyFileName
 
 		// Only remove *unecrypted* key file
@@ -98,7 +99,9 @@ func SendToGCP(to, files, key string) error {
 				key = p
 			}
 
-			fmt.Printf("removing key: %v\n", key)
+			fmt.Printf(`
+				removing key: %v
+				`, key)
 			if errRm := os.Remove(key); errRm != nil {
 				fmt.Println(errRm)
 			}
