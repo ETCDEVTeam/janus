@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/ethereumproject/janus/gcp"
@@ -51,9 +50,9 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 `)
 
 	flag.Usage = func() {
-		log.Println("Usage for Janus:")
-		log.Println("  $ janus deploy -to builds.etcdevteam.com/go-ethereum/version -file geth.zip -key .gcloud.json")
-		log.Println("  $ janus version -format 'v%M.%m.%P+%C-%S'")
+		fmt.Println("Usage for Janus:")
+		fmt.Println("  $ janus deploy -to builds.etcdevteam.com/go-ethereum/version -file geth.zip -key .gcloud.json")
+		fmt.Println("  $ janus version -format 'v%M.%m.%P+%C-%S'")
 		flag.PrintDefaults()
 	}
 
@@ -80,17 +79,17 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 	if deployCommand.Parsed() {
 		// Ensure required flags are set.
 		if to == "" {
-			log.Println("--to requires an argument")
+			fmt.Println("--to requires an argument")
 			flag.Usage()
 			os.Exit(1)
 		}
 		if files == "" {
-			log.Println("--files requires an argument")
+			fmt.Println("--files requires an argument")
 			flag.Usage()
 			os.Exit(1)
 		}
 		if key == "" {
-			log.Println("--key requires an argument")
+			fmt.Println("--key requires an argument")
 			flag.Usage()
 			os.Exit(1)
 		}
@@ -98,10 +97,10 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 		// Handle deploy.
 		// -- Will check for existing file(s) to upload, will return error if not exists.
 		if e := gcp.SendToGCP(to, files, key); e != nil {
-			log.Println("Failed to deploy:")
-			log.Fatalln(e)
+			fmt.Println("Failed to deploy:")
+			fmt.Println(e)
+			os.Exit(1)
 		}
-		os.Exit(0)
 	} else
 	// Version
 	if versionCommand.Parsed() {

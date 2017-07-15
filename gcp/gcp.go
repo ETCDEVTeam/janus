@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -43,7 +43,7 @@ func writeToGCP(client *storage.Client, bucket, object, file string) error {
 		return err
 	}
 	// [END upload_file]
-	log.Printf(`Successfully uploaded:
+	fmt.Printf(`Successfully uploaded:
 	bucket: %v
 	object: %v
 	file: %v`, bucket, object, file)
@@ -74,7 +74,7 @@ func SendToGCP(to, files, key string) error {
 	// Attempt to unmarshal key file, checks for encryption
 	e := json.Unmarshal(bRead, &arbitraryMap)
 	if e != nil {
-		log.Println("key is possibly encryped, attempting to decrypt with $GCP_PASSWD")
+		fmt.Println("key is possibly encryped, attempting to decrypt with $GCP_PASSWD")
 
 		passwd := os.Getenv("GCP_PASSWD")
 		if passwd == "" {
@@ -85,14 +85,22 @@ func SendToGCP(to, files, key string) error {
 			return decryptError
 		}
 
-		log.Println("decrypted key file to ", decryptedKeyFileName)
+		fmt.Println("decrypted key file to ", decryptedKeyFileName)
 		key = decryptedKeyFileName
 
 		// Only remove *unecrypted* key file
 		defer func() {
-			log.Printf("removing key: %v", key)
+			key = filepath.Clean(key)
+			p, pe := filepath.Abs(key)
+			if pe != nil {
+				fmt.Println(pe)
+			} else {
+				key = p
+			}
+
+			fmt.Printf("removing key: %v", key)
 			if errRm := os.Remove(key); errRm != nil {
-				log.Println(errRm)
+				fmt.Println(errRm)
 			}
 		}()
 	}
@@ -119,7 +127,7 @@ func SendToGCP(to, files, key string) error {
 			return e
 		}
 		if fi.IsDir() {
-			log.Printf("%s is a directory, continuing", fi.Name())
+			fmt.Printf("%s is a directory, continuing", fi.Name())
 			continue
 		}
 		// eg.

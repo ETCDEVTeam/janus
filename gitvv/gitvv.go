@@ -1,7 +1,7 @@
 package gitvv
 
 import (
-	"log"
+	"fmt"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -74,7 +74,7 @@ func getCommitCount() string {
 	c, e := exec.Command("git", "rev-list", "HEAD", "--count").Output()
 	if e != nil {
 		// TODO: handle error better
-		log.Println(e)
+		fmt.Println(e)
 		return "0"
 	}
 
@@ -89,7 +89,7 @@ func getHEADHash() string {
 
 	c, e := exec.Command("git", "rev-list", "HEAD", "--max-count=1").Output()
 	if e != nil {
-		log.Println(e)
+		fmt.Println(e)
 		return "???????"
 	}
 
@@ -145,7 +145,7 @@ func GetVersion(format string) string {
 	}
 	d, e := getDescription()
 	if e != nil {
-		log.Println(e)
+		fmt.Println(e)
 		return ""
 	}
 	out := format
