@@ -153,6 +153,16 @@ func GetVersion(format string) string {
 	sha := getSHA1FromDescription(d)
 	semvers := getSemverFromDescription(d)
 
+	// Convention alert:
+	// Want: when commit count is 0 (ie HEAD is on a tag), should yield only semver, eg v3.5.0
+	//       when commit count is >0 (ie HEAD is above a tag), should yield full "nightly" version name, eg v3.5.0+14-adfe123
+	if format == "TAG_OR_NIGHTLY" {
+		out = "v%M.%m.%P+%C-%S"
+		if commitCount == "0" {
+			out = "v%M.%m.%P"
+		}
+	}
+
 	// -1 to replace indefinitely. Allows maximum user-decision-making.
 	out = strings.Replace(out, "%M", semvers[0], -1)
 	out = strings.Replace(out, "%m", semvers[1], -1)
