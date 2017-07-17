@@ -38,12 +38,14 @@ $ janus version -format v%M.%m.%P+%C-%S
 
 `-format=value` takes the interpolated forms:
 ```txt
-%M - major version
-%m - minor version
-%P - patch version
-%C - commit count since last tag
-%S - HEAD sha1 (first 7 characters)
+%M, _M - major version
+%m, _m - minor version
+%P, _P - patch version
+%C, _C - commit count since last tag
+%S, _S - HEAD sha1 (first 7 characters)
 ```
+_Note_: you may use either `%M` or `_M` to interpolate `Minor version`. The reason for this is
+escaping `%` in AppVeyor (via PowerShell or batch) is very tricky.
 
 So this:
 

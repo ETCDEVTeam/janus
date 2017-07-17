@@ -133,11 +133,11 @@ func getSHA1FromDescription(s string) string {
 // GetVersion gets formatted git version
 // It assumes tags are by semver standards
 // format:
-// %M - major version
-// %m - minor version
-// %P - patch version
-// %C - commit count since last tag
-// %S - HEAD sha1
+// %M, _M - major version
+// %m, _m - minor version
+// %P, _P - patch version
+// %C, _C - commit count since last tag
+// %S, _S - HEAD sha1
 func GetVersion(format string) string {
 	if format == "" {
 		// v3.5.0+66-bbb06b1
@@ -159,5 +159,14 @@ func GetVersion(format string) string {
 	out = strings.Replace(out, "%P", semvers[2], -1)
 	out = strings.Replace(out, "%C", commitCount, -1)
 	out = strings.Replace(out, "%S", sha, -1)
+
+	// Problem: escaping %'s in windows (ps or batch) is a pain in the ass.
+	// Solution: offer an extra set of escape vars for use with AppVeyor.
+	out = strings.Replace(out, "_M", semvers[0], -1)
+	out = strings.Replace(out, "_m", semvers[1], -1)
+	out = strings.Replace(out, "_P", semvers[2], -1)
+	out = strings.Replace(out, "_C", commitCount, -1)
+	out = strings.Replace(out, "_S", sha, -1)
+
 	return out
 }
