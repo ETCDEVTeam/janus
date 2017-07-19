@@ -1,13 +1,28 @@
-Janus is a reusable tool for versioning and deploying builds to Google Cloud Provider (GCP) Storage from the CI
+Janus is a tool for versioning and deploying builds to Google Cloud Provider (GCP) Storage from the CI
 environment.
 
 ## Install
 
-#### Requirements:
-- [ ] encrypted JSON GCP service account key, with access to GCP _Storage_ feature
-- [ ] CI environment variable `GCP_PASSWD` to be set, either via secure global (as below), or via CI GUI interface
-- [ ] having Janus installed (as below), via `curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash`, and then exporting her to the CI `PATH`
-- [ ] in order to verify the janus archive `gpg` must be available in the system. `gpg` is standard on Travis.
+#### CI System Requirements:
+- [ ] __JSON GCP Service Account Key__, with access to GCP _Storage_ enabled.
+- [ ] __CI environment variable `GCP_PASSWD`__ to be set if the key is encrypted.
+- [ ] __openssl__ is required for key decryption. This is standard on Travis. AppVeyor may require that you add some extra things to your `PATH`, but you may not have to install anything extra.
+- [ ] __gpg__ is required to verify the Janus binary. This is standard on Travis and AppVeyor.
+
+#### Install Janus:
+
+##### Travis
+```shell
+- curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+- export PATH=./janusbin:$PATH
+```
+
+##### AppVeyor
+```shell
+- set PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin\;%PATH%
+- curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get-windows.sh | bash
+- set PATH=./janusbin;%PATH%
+```
 
 ## Usage
 Janus has two subcommands: `deploy` and `version`.
@@ -18,9 +33,9 @@ and depends on an __environment variable `GCP_PASSWD`__ to be set. After success
 
 | flag | example | description |
 | --- | --- | --- |
-| `-to` | `builds.etcdevteam.com/go-ethereum/3.5.x`| __builds.etcdevteam.com__/path/to/hold/the/file(s) |
+| `-to` | `builds.etcdevteam.com/go-ethereum/v3.5.x/`| bucket, followed by 'directory' in which to hold the uploaded archive |
 | `-files` | `./dist/*.zip` | file(s) to upload, can use relative or absolute path and/or wildcard globbing |
-| `-key` | `./gcloud-travis.enc.json` | encrypted _or_ decrypted JSON GCP service key file |
+| `-key` | `./gcloud-travis.enc.json` | encrypted or decrypted JSON GCP service key file |
 
 ```shell
 $ janus deploy -to builds.etcdevteam.com/go-ethereum/v3.5.x/ -files ./dist/*.zip -key gcloud-service-encrypted-or-decrypted.json
@@ -44,8 +59,7 @@ $ janus version -format v%M.%m.%P+%C-%S
 %C, _C - commit count since last tag
 %S, _S - HEAD sha1 (first 7 characters)
 ```
-_Note_: you may use either `%M` or `_M` to interpolate `Minor version`. The reason for this is
-escaping `%` in AppVeyor (via PowerShell or batch) is very tricky.
+_Note_: you may use either `%M` or `_M` syntax to interpolate version variables, since escaping `%` in batch scripts is rather tricky.
 
 So this:
 
@@ -62,42 +76,8 @@ replaces this:
 - sed -E 's/v([[:digit:]]+\.[[:digit:]]+)\.[[:digit:]]-([[:digit:]]+).+/v\1.x/' version.txt > version-base.txt
 ```
 
-## Example
-```yml
-# .travis.yml
-env:
-  global:
-    # This value should hold at least environment variable GCP_PASSWD=xxx in order to decrypt the GCP service account key that Janus relies on.
-    # eg.
-    # $ travis encrypt -r ethereumproject/emerald-rs GCP_PASSWD=asdfasdfasdfasdfasdf
-    - secure: "MjvfqrKakMa+z+6LFxaL30n+BtjxUm2BnJ6/+S5cbxo"
-
-before_deploy:
-  # Install Janus
-  - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
-
-  # Add janus to PATH, this is *required*.
-  #   Gotcha: This has to happen outside the 'get' script, otherwise PATH will only be set for
-  #   the script subprocess.
-  - export PATH=$PATH:$PWD/janusbin
-
-  # Prepare file(s) to deploy.
-  - zip emerald-"$TRAVIS_OS_NAME"-$(janus version -format v%M.%m.%P+%C-%S).zip emerald-cli
-
-deploy:
-  # Note that it's important to skip cleanup if you want to deploy builds generated during a previous process
-  skip_cleanup: true
-  provider: script
-  # Note that if you want to use a stand-alone script, you can use the follow syntax.
-  #   Gotcha: on Travis you *must* use the relative path execution syntax ('./')
-  # script: ./deploy.sh
-  script:
-      # Note that decrypting the GCP service key requires GCP_PASSWD environment variable to be set (see above).
-      - janus deploy -to "builds.etcdevteam.com/project/$(janus version -format %M.%m.x)" -files "*.zip-key gcp-key.enc.json
-  on:
-    branch: master
-  tags: true
-```
+## Examples
+Please visit the [/examples directory](./examples) to find example Travis and AppVeyor configuration files, deploy script, and service key.
 
 
 ----
