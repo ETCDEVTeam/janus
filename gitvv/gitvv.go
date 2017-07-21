@@ -2,9 +2,12 @@ package gitvv
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	"regexp"
 	"strings"
+	"strconv"
+	"errors"
 )
 
 type gitDescription int
@@ -14,6 +17,8 @@ const (
 	gitHash                                  // bbb06b1 or gbbb06b1
 	gitFullDescription                       // v3.5.0-66-gbbb06b1
 )
+
+const defaultHashLength = 7
 
 var (
 	cacheDescription string
@@ -82,21 +87,22 @@ func getCommitCount() string {
 	return cacheCommitCount
 }
 
-func getHEADHash() string {
+func getHEADHash(length int) string {
 	if cacheHEADHash != "" {
-		return cacheHEADHash
+		return cacheHEADHash[:length]
 	}
 
-	c, e := exec.Command("git", "rev-list", "HEAD", "--max-count=1").Output()
+	c, e := exec.Command("git", "rev-parse", "HEAD").Output()
+	// > b9d3d5da740b4ed748734565614b8fe7885d9714
 	if e != nil {
-		fmt.Println(e)
+		log.Fatalln(e)
 		return "???????"
 	}
 
-	sha1 := strings.TrimSpace(string(c)[:7])
+	sha1 := strings.TrimSpace(string(c))
+	cacheHEADHash = sha1 // cache
 
-	cacheHEADHash = sha1
-	return cacheHEADHash
+	return cacheHEADHash[:length]
 }
 
 func getDescription() (string, error) {
@@ -113,7 +119,7 @@ func getDescription() (string, error) {
 	return cacheDescription, nil
 }
 
-func getSHA1FromDescription(s string) string {
+func getSHA1FromDescription(s string, hashLength int) string {
 	switch getTypeofDescription(s) {
 	case gitFullDescription:
 		ss := strings.Split(s, "-")
@@ -127,7 +133,34 @@ func getSHA1FromDescription(s string) string {
 	case gitHash:
 		return strings.TrimPrefix(s, "g")
 	}
-	return getHEADHash()
+	return getHEADHash(hashLength)
+}
+
+// parseHashLength parses desired hash length output with default for none set
+// eg.
+// %S8 -> 8
+// %S123 -> 123
+// %S -> defaultLen
+// NOTE: only compatible with single use #TODO?
+func parseHashLength(s string, defaultLen int) (int, error) {
+	re := regexp.MustCompile(`\%S(\d+)`)
+	m := re.MatchString(s)
+	// no digits following %S, use default
+	if !m {
+		return defaultLen, nil
+	}
+	f := re.FindAllString(s, 1)
+	if f == nil || len(f) == 0 {
+		return defaultLen, errors.New("regex return match but no matching string(s) found")
+	}
+	ff := f[0]
+	ff = strings.TrimPrefix(ff, "%S")
+	i, e := strconv.Atoi(ff)
+	if e != nil {
+		return defaultLen, e
+	}
+
+	return i, nil
 }
 
 // GetVersion gets formatted git version
@@ -141,27 +174,39 @@ func getSHA1FromDescription(s string) string {
 func GetVersion(format string) string {
 	if format == "" {
 		// v3.5.0+66-bbb06b1
-		format = "v%M.%m.%P+%C-%S"
+		format = "v%M.%m.%P-%S"
 	}
+
 	d, e := getDescription()
 	if e != nil {
 		fmt.Println(e)
 		return ""
 	}
 	out := format
+
 	commitCount := getCommitCountFromDescription(d)
-	sha := getSHA1FromDescription(d)
-	semvers := getSemverFromDescription(d)
 
 	// Convention alert:
 	// Want: when commit count is 0 (ie HEAD is on a tag), should yield only semver, eg v3.5.0
 	//       when commit count is >0 (ie HEAD is above a tag), should yield full "nightly" version name, eg v3.5.0+14-adfe123
+	// This syntax allows to signify tagged builds vs running builds.
 	if format == "TAG_OR_NIGHTLY" {
 		out = "v%M.%m.%P+%C-%S"
 		if commitCount == "0" {
 			out = "v%M.%m.%P"
 		}
 	}
+
+	sha := getHEADHash(defaultHashLength)
+	if strings.Index(format, "%S") >= 0 {
+		l, e := parseHashLength(format, defaultHashLength)
+		if e != nil {
+			log.Println(e)
+		}
+		sha = getSHA1FromDescription(d, l)
+	}
+
+	semvers := getSemverFromDescription(d)
 
 	// -1 to replace indefinitely. Allows maximum user-decision-making.
 	out = strings.Replace(out, "%M", semvers[0], -1)
