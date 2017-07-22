@@ -1,0 +1,41 @@
+platform: x64
+clone_folder: c:\gopath\src\github.com\ethereumproject\janus
+os: Visual Studio 2015
+environment:
+  GOPATH: c:\gopath
+install:
+  - set PATH=%GOPATH%\bin;c:\go\bin;C:\msys64\mingw64\bin;C:\msys64\usr\bin\;%PATH%
+  - echo %GOPATH%
+  - go version
+  - go env
+  - go get golang.org/x/sys/windows
+  - go get ./...
+
+build_script:
+  # Disable until I figure out the git submodules required for testing
+  - echo "Skipping tests that require git submodules."
+  #  - go test -v ./...
+
+  # Build and install janus
+  - go install
+
+  # Demonstrate versions
+  - ps: $env:VERSION_BASE = "$(janus.exe version -format='v%M.%m.x')"
+  - echo %VERSION_BASE%
+  - ps: $env:TAG_OR_NIGHTLY = "$(janus.exe version -format=TAG_OR_NIGHTLY)"
+  - echo %TAG_OR_NIGHTLY%
+  - ps: $env:MMPCS= "$(janus.exe version -format='v%M.%m.%P+%C-%S')"
+  - echo %MMPCS%
+  - ps: $env:MMPCS4= "$(janus.exe version -format='v%M.%m.%P+%C-%S4')"
+  - echo %MMPCS4%
+  - ps: $env:MMPCS10= "$(janus.exe version -format='v%M.%m.%P+%C-%S10')"
+  - echo %MMPCS10%
+  - ps: $env:MMBS5 = "$(janus.exe version -format='v%M.%m.%B-%S5')"
+  - echo %MMBS5%
+
+  # Build for artifact
+  - go build
+  - 7z a brainy-win64-%VERSION%.zip janus.exe
+artifacts:
+  - path: '*.zip'
+    name: janus
