@@ -15,7 +15,7 @@ set -e
 TAR_FILE="/tmp/janus.zip"
 TAR_FILE_SIG="/tmp/janus.zip.sig"
 ISAAC_GPG_FILE="/tmp/isaac-gpg.txt"
-ISAAC_GPG_URL="https://raw.githubusercontent.com/ethereumproject/volunteer/master/Volunteer-Public-Keys/isaac.ardis%40gmail.com"
+ISAAC_GPG_URL="https://raw.githubusercontent.com/ethereumproject/volunteer/7a78a94307d67a0b20e418568b7bccac83c3d143/Volunteer-Public-Keys/isaac.ardis%40gmail.com"
 DOWNLOAD_URL="https://github.com/ethereumproject/janus/releases/download"
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 
