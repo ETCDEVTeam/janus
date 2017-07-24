@@ -35,7 +35,7 @@ build_script:
 
   # Build for artifact
   - go build
-  - 7z a brainy-win64-%VERSION%.zip janus.exe
+  - 7z a janus-win64-%TAG_OR_NIGHTLY%.zip janus.exe
 artifacts:
   - path: '*.zip'
     name: janus
