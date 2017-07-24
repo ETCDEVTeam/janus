@@ -8,6 +8,7 @@ environment.
 - [ ] __CI environment variable `GCP_PASSWD`__ to be set if the key is encrypted.
 - [ ] __openssl__ is required for key decryption. This is standard on Travis. AppVeyor may require that you add some extra things to your `PATH`, but you may not have to install anything extra.
 - [ ] __gpg__ is required to verify the Janus binary. This is standard on Travis and AppVeyor.
+- [ ] __rev__, __curl__, and a few other basic bash commands are required for the installer script. Standard on Travis, can be added to PATH for AppVeyor as per example below
 
 #### Install Janus:
 
@@ -23,6 +24,27 @@ environment.
 - curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get-windows.sh | bash
 - set PATH=./janusbin;%PATH%
 ```
+
+__Security note:__ The installer scripts `get.sh` and `get-windows.sh` will use GPG to verify the latest Janus release binary against
+the signing GPG key downloaded from a [specific commit at ethereumproject/volunteer](https://raw.githubusercontent.com/ethereumproject/volunteer/7a78a94307d67a0b20e418568b7bccac83c3d143/Volunteer-Public-Keys/isaac.ardis%40gmail.com).
+For an additional layer of security, you may use the provided installer script signatures (`./*.sig`) to verify the installer script itself before using Janus
+to deploy from your CI build. For maximum security, use a locally tracked version of [the signing key](https://raw.githubusercontent.com/ethereumproject/volunteer/7a78a94307d67a0b20e418568b7bccac83c3d143/Volunteer-Public-Keys/isaac.ardis%40gmail.com)
+in your own repo. Alternatively, you can mimic the installer script itself, and use `curl` to download the key from the specific commit as mentioned previously. The link is:
+
+> https://raw.githubusercontent.com/ethereumproject/volunteer/7a78a94307d67a0b20e418568b7bccac83c3d143/Volunteer-Public-Keys/isaac.ardis%40gmail.com
+
+In practice, this would look like:
+```yml
+ - curl -sLO https://raw.githubusercontent.com/ethereumproject/volunteer/7a78a94307d67a0b20e418568b7bccac83c3d143/Volunteer-Public-Keys/isaac.ardis%40gmail.com
+ - gpg --import isaac.ardis@gmail.com
+ - curl -sLO https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh
+ - curl -sLO https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh.sig
+ - gpg --verify get.sh.sig get.sh
+ - chmod +x get.sh
+ - bash get.sh
+```
+
+Note that if you implement this additional layer and the signing key changes, you'll need to update either your tracked version of the key or download link accordingly.
 
 ## Usage
 Janus has two subcommands: `deploy` and `version`.
@@ -43,11 +65,11 @@ $ janus deploy -to builds.etcdevteam.com/go-ethereum/v3.5.x/ -files ./dist/*.zip
 ```
 
 #### Version
-`version` uses some variant of `git describe` or `git rev-list` to produce a
+`version` uses `git` subcommands to produce a
 version number, as defined by `-format`
 
 ```shell
-$ janus version -format v%M.%m.%P+%C-%S
+$ janus version -format='v%M.%m.%P+%C-%S'
 > v3.5.0+55-asdf123
 ```
 
@@ -56,6 +78,7 @@ $ janus version -format v%M.%m.%P+%C-%S
 %M, _M - major version
 %m, _m - minor version
 %P, _P - patch version
+%B, _B - hybrid patch version: `(%P * 100) + %C`
 %C, _C - commit count since last tag
 %S, _S - HEAD sha1 (first 7 characters)
 ```
@@ -65,8 +88,8 @@ So this:
 
 | sed output (.txt) | format syntax |
 | --- | --- |
-| `version-base.txt` | `--format v%M.%m.x` |
-| `version-app.txt` | `--format v%M.%m.%P+%C-%S` |
+| `version-base.txt` | `-format v%M.%m.x` |
+| `version-app.txt` | `-format v%M.%m.%P+%C-%S` |
 
 replaces this:
 ```yml
