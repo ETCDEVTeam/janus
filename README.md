@@ -99,9 +99,49 @@ replaces this:
 - sed -E 's/v([[:digit:]]+\.[[:digit:]]+)\.[[:digit:]]-([[:digit:]]+).+/v\1.x/' version.txt > version-base.txt
 ```
 
-## Examples
+## Examples and notes
 Please visit the [/examples directory](./examples) to find example Travis and AppVeyor configuration files, deploy script, and service key.
 
+#### Gotchas
+
+If you use a `script` deploy for Travis, __ensure that the deploy script is executable__, eg.
+```yml
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: ./deploy.sh # <-- chmod +x
+  on:
+    branch: master
+  tags: true
+```
+
+----
+
+An encrypted `GCP_PASSWD` _cannot_ be used between repos; __each GCP_PASSWD encryption should
+be specific to a repo__.
+
+For Appveyor and Travis there are two ways to establish environment
+variables:
+
+1. In the configuration file itself, eg.
+
+```bash
+# Encrypt GCP_PASSWD for Travis
+$ travis encrypt GCP_PASSWD=abcd
+> MKhc0c07V1z75sGJuZl19lM2Mj5hIXuM5DxTI1hLxz0kfOel/TZSf4557ip5Mp0MRKkgXeTlP6bJQX3taVONVTT8ZFwj9m2gbiYYuOubx5mf17Fa2YwYmQ9G7HRmMvge6ypeI1uibyOv2fUNhIMeMLhuFTgkV1pw1R/oeXTD8U7TivgYTXy8/6iDf66NPpXWZNwJ0d5GfSybiT31gglubiC9ehnmDNIgDYRlO8vr7TdB9eTkX6gEiEhdvyLBu+ljLN2VznvTQoCsByq6yUPNSKDbTodcYXfugtWpksqnsSoinlGhVAMJE2jCT71gdeMHzIgo4xYxEB6GqfbnOot5knlgBmQo7tlPHD7gfCYfdB7WWKJW9lmUAGVwpWQup+rBLbuVhKvjgeevZy/5JkGghoiPh6Mw9txy/zmTS+QwlTA9m+blZcqAksNcT0TE68dGXxpvhzI+WDu3XjhQE31VWG7daw9QyZHlhkma2xCmM1zDHvpbiyPlTSAWQyUU2TgVOs4fIlMYbV/NSkB4zWz4TvhqJHv2AtFtXw9y+xoBgd2GidKR7YtAjjBOPjb+KmyZ470nwdmoe7tCZM6Y0FLlkeVjKRxS0sD2DOheZX/gzdsQt2L8XIzjCdcp2QhV1/h5WEQop9Lm1FO/bGco/2525l2ExR7AW8Phz7ot+/mpvQA=
+```
+
+```yml
+# .travis.yml
+env:
+  global:
+    - secure: "MKhc0c07V1z75sGJuZl19lM2Mj5hIXuM5DxTI1hLxz0kfOel/TZSf4557ip5Mp0MRKkgXeTlP6bJQX3taVONVTT8ZFwj9m2gbiYYuOubx5mf17Fa2YwYmQ9G7HRmMvge6ypeI1uibyOv2fUNhIMeMLhuFTgkV1pw1R/oeXTD8U7TivgYTXy8/6iDf66NPpXWZNwJ0d5GfSybiT31gglubiC9ehnmDNIgDYRlO8vr7TdB9eTkX6gEiEhdvyLBu+ljLN2VznvTQoCsByq6yUPNSKDbTodcYXfugtWpksqnsSoinlGhVAMJE2jCT71gdeMHzIgo4xYxEB6GqfbnOot5knlgBmQo7tlPHD7gfCYfdB7WWKJW9lmUAGVwpWQup+rBLbuVhKvjgeevZy/5JkGghoiPh6Mw9txy/zmTS+QwlTA9m+blZcqAksNcT0TE68dGXxpvhzI+WDu3XjhQE31VWG7daw9QyZHlhkma2xCmM1zDHvpbiyPlTSAWQyUU2TgVOs4fIlMYbV/NSkB4zWz4TvhqJHv2AtFtXw9y+xoBgd2GidKR7YtAjjBOPjb+KmyZ470nwdmoe7tCZM6Y0FLlkeVjKRxS0sD2DOheZX/gzdsQt2L8XIzjCdcp2QhV1/h5WEQop9Lm1FO/bGco/2525l2ExR7AW8Phz7ot+/mpvQA="
+```
+
+2. In the CI GUI under _Environment_ or _Settings_. In this case you should use
+the _unencrypted_ password. Don't worry, it won't be visible in the logs.
+
+In both cases, environment `GCP_PASSWD` will be now available for use.
 
 ----
 
