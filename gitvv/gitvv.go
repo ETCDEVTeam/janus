@@ -35,9 +35,12 @@ func isHash(s string) bool {
 
 // getTagOnHEADCommit gets the tag on the current commit, else
 // returns "" if no tag on current commit
-func getTagIfTagOnHEADCommit() (string, bool) {
+func getTagIfTagOnHEADCommit(dir string) (string, bool) {
 	//git describe --exact-match --abbrev=0
-	c, e := exec.Command("git", "describe", "--exact-match", "--abbrev=0").CombinedOutput()
+	if dir == "" {
+		dir = "."
+	}
+	c, e := exec.Command("git", "-C", dir, "describe", "--exact-match", "--abbrev=0").CombinedOutput()
 	if e != nil {
 		//log.Println(e)
 		return "", false
@@ -49,7 +52,7 @@ func getTagIfTagOnHEADCommit() (string, bool) {
 	return tag, true
 }
 
-func getCommitCountFrom(fromTag string) string {
+func getCommitCountFrom(fromTag, dir string) string {
 	if cacheCommitCount != "" && cacheCommitCountFromTagName == fromTag {
 		return cacheCommitCount
 	}
@@ -58,8 +61,10 @@ func getCommitCountFrom(fromTag string) string {
 	if fromTag != "" {
 		reference = fromTag + "..HEAD"
 	}
-
-	c, e := exec.Command("git", "rev-list", reference, "--count").Output()
+	if dir == "" {
+		dir = "."
+	}
+	c, e := exec.Command("git", "-C", dir, "rev-list", reference, "--count").Output()
 	if e != nil {
 		// TODO: handle error better
 		//log.Println(e)
@@ -73,12 +78,14 @@ func getCommitCountFrom(fromTag string) string {
 	return cacheCommitCount
 }
 
-func getHEADHash(length int) string {
+func getHEADHash(length int, dir string) string {
 	if cacheHEADHash != "" {
 		return cacheHEADHash[:length]
 	}
-
-	c, e := exec.Command("git", "rev-parse", "HEAD").Output()
+	if dir == "" {
+		dir = "."
+	}
+	c, e := exec.Command("git", "-C", dir, "rev-parse", "HEAD").Output()
 	// > b9d3d5da740b4ed748734565614b8fe7885d9714
 	if e != nil {
 		log.Fatalln(e)
@@ -94,12 +101,14 @@ func getHEADHash(length int) string {
 	return cacheHEADHash[:length]
 }
 
-func getLastTag() (string, bool) {
+func getLastTag(dir string) (string, bool) {
 	if cacheLastTagName != "" {
 		return cacheLastTagName, true
 	}
-
-	vOut, verErr := exec.Command("git", "describe", "--tags", "--abbrev=0").CombinedOutput()
+	if dir == "" {
+		dir = "."
+	}
+	vOut, verErr := exec.Command("git", "-C", dir, "describe", "--tags", "--abbrev=0").CombinedOutput()
 	if verErr != nil {
 		//log.Println(verErr)
 		return "", false
@@ -151,8 +160,8 @@ func parseHashLength(s string) (int, error) {
 }
 
 // getB gets the semi-semver/mod patch number
-func getB() (string, bool) {
-	t, exists := getLastTag()
+func getB(dir string) (string, bool) {
+	t, exists := getLastTag(dir)
 	if !exists {
 		return "", false
 	}
@@ -162,7 +171,7 @@ func getB() (string, bool) {
 	}
 	p := semvers[2]
 
-	c := getCommitCountFrom(t)
+	c := getCommitCountFrom(t, dir)
 
 	pi, e := strconv.Atoi(p)
 	if e != nil {
@@ -191,12 +200,12 @@ func getB() (string, bool) {
 // %P, _P - patch version
 // %C, _C - commit count since last tag
 // %S, _S - HEAD sha1
-func GetVersion(format string) string {
+func GetVersion(format, dir string) string {
 
 	var (
 		lastTag     string
 		commitCount string = "0"
-		semvers = []string{}
+		semvers            = []string{}
 		sha         string
 	)
 	semvers = nil
@@ -208,15 +217,15 @@ func GetVersion(format string) string {
 	}
 
 	// Need to get commit count
-	lastTag, _ = getTagIfTagOnHEADCommit()
+	lastTag, _ = getTagIfTagOnHEADCommit(dir)
 	// Is not 0
 	if lastTag == "" {
-		lastTag, _ = getLastTag()
+		lastTag, _ = getLastTag(dir)
 		// Either from init (entire branch) or lastTag
 
 	}
 
-	commitCount = getCommitCountFrom(lastTag)
+	commitCount = getCommitCountFrom(lastTag, dir)
 	if lastTag != "" {
 		semvers = parseSemverFromTag(lastTag)
 	}
@@ -233,7 +242,7 @@ func GetVersion(format string) string {
 		}
 	}
 
-	sha = getHEADHash(defaultHashLength)
+	sha = getHEADHash(defaultHashLength, dir)
 	if strings.Index(format, "%S") >= 0 {
 		l, e := parseHashLength(format)
 		if e != nil {
@@ -241,7 +250,7 @@ func GetVersion(format string) string {
 		}
 		if l != defaultHashLength {
 			cacheHEADHash = ""
-			sha = getHEADHash(l)
+			sha = getHEADHash(l, dir)
 		}
 	}
 
@@ -272,7 +281,7 @@ func GetVersion(format string) string {
 	out = re1.ReplaceAllLiteralString(out, sha)
 	out = re2.ReplaceAllLiteralString(out, sha)
 
-	b, ok := getB()
+	b, ok := getB(dir)
 	if ok {
 		out = strings.Replace(out, "%B", b, -1)
 		out = strings.Replace(out, "_B", b, -1)

@@ -18,7 +18,7 @@ func main() {
 	// Deploy flags
 	var key, files, to string
 	// Version flags
-	var format string
+	var dir, format string
 
 	// Set up flags.
 	//
@@ -38,6 +38,7 @@ eg.
 	deployCommand.StringVar(&files, "files", "", "file(s) to upload, allows globbing")
 	deployCommand.StringVar(&key, "key", "", "service account json key file, may be encrypted OR decrypted")
 	// Version
+	versionCommand.StringVar(&dir, "dir", "", `path to base directory`)
 	versionCommand.StringVar(&format, "format", "", `format of git version:
 
 %M - major version
@@ -104,7 +105,7 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 	} else
 	// Version
 	if versionCommand.Parsed() {
-		v := gitvv.GetVersion(format)
+		v := gitvv.GetVersion(format, dir)
 		fmt.Print(v)
 		os.Exit(0)
 	} else
