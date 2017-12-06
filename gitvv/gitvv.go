@@ -238,7 +238,7 @@ func GetVersion(format, dir string) string {
 	if format == "TAG_OR_NIGHTLY" {
 		format = "v%M.%m.%P+%C-%S"
 		if commitCount == "0" {
-			format = "v%M.%m.%P"
+			format = "v%M.%m.%P-%S"
 		}
 	}
 
