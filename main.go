@@ -45,7 +45,8 @@ eg.
 %m - minor version
 %P - patch version
 %C - commit count since last tag
-%S - HEAD sha1
+%S[|NUMBER] - HEAD sha1, where NUMBER is optional desired length of hash (default: 7)
+%B - hybrid patch number (B = semver_minor_version*100 + commit_count)
 
 Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 `)

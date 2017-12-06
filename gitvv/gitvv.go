@@ -200,6 +200,7 @@ func getB(dir string) (string, bool) {
 // %P, _P - patch version
 // %C, _C - commit count since last tag
 // %S, _S - HEAD sha1
+// %B - hybrid patch number [semver_minor_version*100 + commit_count]
 func GetVersion(format, dir string) string {
 
 	var (
