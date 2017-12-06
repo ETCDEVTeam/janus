@@ -37,9 +37,7 @@ func isHash(s string) bool {
 // returns "" if no tag on current commit
 func getTagIfTagOnHEADCommit(dir string) (string, bool) {
 	//git describe --exact-match --abbrev=0
-	if dir == "" {
-		dir = "."
-	}
+
 	c, e := exec.Command("git", "-C", dir, "describe", "--exact-match", "--abbrev=0").CombinedOutput()
 	if e != nil {
 		//log.Println(e)
@@ -61,9 +59,6 @@ func getCommitCountFrom(fromTag, dir string) string {
 	if fromTag != "" {
 		reference = fromTag + "..HEAD"
 	}
-	if dir == "" {
-		dir = "."
-	}
 	c, e := exec.Command("git", "-C", dir, "rev-list", reference, "--count").Output()
 	if e != nil {
 		// TODO: handle error better
@@ -81,9 +76,6 @@ func getCommitCountFrom(fromTag, dir string) string {
 func getHEADHash(length int, dir string) string {
 	if cacheHEADHash != "" {
 		return cacheHEADHash[:length]
-	}
-	if dir == "" {
-		dir = "."
 	}
 	c, e := exec.Command("git", "-C", dir, "rev-parse", "HEAD").Output()
 	// > b9d3d5da740b4ed748734565614b8fe7885d9714
@@ -104,9 +96,6 @@ func getHEADHash(length int, dir string) string {
 func getLastTag(dir string) (string, bool) {
 	if cacheLastTagName != "" {
 		return cacheLastTagName, true
-	}
-	if dir == "" {
-		dir = "."
 	}
 	vOut, verErr := exec.Command("git", "-C", dir, "describe", "--tags", "--abbrev=0").CombinedOutput()
 	if verErr != nil {
@@ -210,6 +199,11 @@ func GetVersion(format, dir string) string {
 		sha         string
 	)
 	semvers = nil
+
+	// Set current dir as default in case flag not set.
+	if dir == "" {
+		dir = "."
+	}
 
 	// Set default format.
 	if format == "" {
