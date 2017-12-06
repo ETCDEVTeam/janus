@@ -56,7 +56,7 @@ func Test_getLastTag(t *testing.T) {
 		// Clear cache
 		cacheLastTagName = ""
 
-		tag, ok := getLastTag()
+		tag, ok := getLastTag(repo.dir)
 		if ok != repo.wantb {
 			t.Errorf("got: %v, want: %v", ok, repo.wantb)
 		}
@@ -95,7 +95,7 @@ func Test_getTagIfTagOnHEADCommit(t *testing.T) {
 		// Clear cache
 		cacheLastTagName = ""
 
-		tag, ok := getTagIfTagOnHEADCommit()
+		tag, ok := getTagIfTagOnHEADCommit(repo.dir)
 		if ok != repo.wantb {
 			t.Errorf("got: %v, want: %v", ok, repo.wantb)
 		}
@@ -136,7 +136,7 @@ func Test_getHEADHash(t *testing.T) {
 		// Clear cache
 		cacheHEADHash = ""
 
-		h := getHEADHash(repo.hashLength)
+		h := getHEADHash(repo.hashLength, repo.dir)
 		if len(h) != repo.hashLength {
 			t.Errorf("want: %d, got: %d, h: %s", repo.hashLength, len(h), h)
 		}
@@ -183,7 +183,7 @@ func Test_getCommitCountFrom(t *testing.T) {
 		cacheCommitCount = ""
 		cacheCommitCountFromTagName = ""
 
-		count := getCommitCountFrom(repo.fromTag)
+		count := getCommitCountFrom(repo.fromTag, repo.dir)
 		if count != repo.want {
 			t.Errorf("got: %v, want: %v", count, repo.want)
 		}
@@ -196,8 +196,8 @@ func Test_getCommitCountFrom(t *testing.T) {
 
 func Test_getB(t *testing.T) {
 	table := []struct {
-		dir     string
-		wants    string
+		dir   string
+		wants string
 		wantb bool
 	}{
 		{noTagsDir, "", false},
@@ -221,7 +221,7 @@ func Test_getB(t *testing.T) {
 		cacheCommitCountFromTagName = ""
 		cacheLastTagName = ""
 
-		b, ok := getB()
+		b, ok := getB(repo.dir)
 		if ok != repo.wantb {
 			t.Errorf("got: %v, want: %v", ok, repo.wantb)
 		}
@@ -266,13 +266,12 @@ func TestGetVersion(t *testing.T) {
 		{aboveTagDir, "v%M.%m.%P+%C-%S5", "v0.0.1+1-fe53b"},
 
 		{noTagsDir, "TAG_OR_NIGHTLY", "v?.?.?+1-8673a80"},
-		{onTagDir, "TAG_OR_NIGHTLY", "v0.0.1"},
+		{onTagDir, "TAG_OR_NIGHTLY", "v0.0.1-e35b683"},
 		{aboveTagDir, "TAG_OR_NIGHTLY", "v0.0.1+1-fe53b1e"},
 
 		{noTagsDir, "v%M.%m.%B-%S5", "v?.?.?-8673a"},
 		{onTagDir, "v%M.%m.%B-%S5", "v0.0.100-e35b6"},
 		{aboveTagDir, "v%M.%m.%B-%S5", "v0.0.101-fe53b"},
-
 	}
 
 	for _, repo := range table {
@@ -292,7 +291,7 @@ func TestGetVersion(t *testing.T) {
 		cacheLastTagName = ""
 		cacheCommitCountFromTagName = ""
 
-		got := GetVersion(repo.format)
+		got := GetVersion(repo.format, repo.dir)
 		if got != repo.want {
 			t.Errorf("got: %v, want: %v", got, repo.want)
 		}
