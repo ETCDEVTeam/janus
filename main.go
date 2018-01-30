@@ -17,6 +17,7 @@ func main() {
 
 	// Deploy flags
 	var key, files, to string
+	var gpg bool
 	// Version flags
 	var dir, format string
 
@@ -37,6 +38,7 @@ eg.
 `)
 	deployCommand.StringVar(&files, "files", "", "file(s) to upload, allows globbing")
 	deployCommand.StringVar(&key, "key", "", "service account json key file, may be encrypted OR decrypted")
+	deployCommand.BoolVar(&gpg, "gpg", false, "use GPG 2 instead of openssl for decryption")
 	// Version
 	versionCommand.StringVar(&dir, "dir", "", `path to base directory`)
 	versionCommand.StringVar(&format, "format", "", `format of git version:
@@ -98,7 +100,7 @@ Default: v%M.%m.%P+%C-%S -> v3.5.0+66-bbb06b1
 
 		// Handle deploy.
 		// -- Will check for existing file(s) to upload, will return error if not exists.
-		if e := gcp.SendToGCP(to, files, key); e != nil {
+		if e := gcp.SendToGCP(to, files, key, gpg); e != nil {
 			fmt.Println("Failed to deploy:")
 			fmt.Println(e)
 			os.Exit(1)

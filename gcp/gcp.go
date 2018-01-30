@@ -53,7 +53,7 @@ func writeToGCP(client *storage.Client, bucket, object, file string) error {
 
 // SendToGCP sends a file or files to Google Cloud Provider storage
 // using a service account JSON key
-func SendToGCP(to, files, key string) error {
+func SendToGCP(to, files, key string, gpg bool) error {
 
 	to = filepath.Clean(to)
 	files = filepath.Clean(files)
@@ -77,12 +77,30 @@ func SendToGCP(to, files, key string) error {
 	if e != nil {
 		fmt.Println("key is possibly encryped, attempting to decrypt with $GCP_PASSWD")
 
-		if os.Getenv("GCP_PASSWD") == "" {
+		passwd := os.Getenv("GCP_PASSWD")
+		if passwd == "" {
 			return errors.New("env GCP_PASSWD not set, cannot decrypt")
 		}
 		// Assume reading for decoding error is it's encrypted... attempt to decrypt
-		if decryptError := exec.Command("openssl", "aes-256-cbc", "-pass", "env:GCP_PASSWD", "-in", key, "-out", decryptedKeyFileName, "-d").Run(); decryptError != nil {
-			return decryptError
+		if gpg {
+			// use pipe to securly provide password
+			cmd := exec.Command("gpg", "--batch", "--passphrase-fd", "0", "--decrypt", "--output", decryptedKeyFileName, key)
+			writer, err := cmd.StdinPipe()
+			if err != nil {
+				return err
+			}
+			go func() {
+				defer writer.Close()
+				io.WriteString(writer, passwd)
+			}()
+			err = cmd.Run()
+			if err != nil {
+				return err
+			}
+		} else {
+			if decryptError := exec.Command("openssl", "aes-256-cbc", "-pass", "env:GCP_PASSWD", "-in", key, "-out", decryptedKeyFileName, "-d").Run(); decryptError != nil {
+				return decryptError
+			}
 		}
 
 		fmt.Println("decrypted key file to: ", decryptedKeyFileName)
