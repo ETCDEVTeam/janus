@@ -77,12 +77,11 @@ func SendToGCP(to, files, key string) error {
 	if e != nil {
 		fmt.Println("key is possibly encryped, attempting to decrypt with $GCP_PASSWD")
 
-		passwd := os.Getenv("GCP_PASSWD")
-		if passwd == "" {
+		if os.Getenv("GCP_PASSWD") == "" {
 			return errors.New("env GCP_PASSWD not set, cannot decrypt")
 		}
 		// Assume reading for decoding error is it's encrypted... attempt to decrypt
-		if decryptError := exec.Command("openssl", "aes-256-cbc", "-k", passwd, "-in", key, "-out", decryptedKeyFileName, "-d").Run(); decryptError != nil {
+		if decryptError := exec.Command("openssl", "aes-256-cbc", "-pass", "env:GCP_PASSWD", "-in", key, "-out", decryptedKeyFileName, "-d").Run(); decryptError != nil {
 			return decryptError
 		}
 
