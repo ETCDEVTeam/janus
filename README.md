@@ -8,6 +8,7 @@ environment.
 - [ ] __CI environment variable `GCP_PASSWD`__ to be set if the key is encrypted.
 - [ ] __openssl__ is required for key decryption. This is standard on Travis. AppVeyor may require that you add some extra things to your `PATH`, but you may not have to install anything extra.
 - [ ] __gpg__ is required to verify the Janus binary. This is standard on Travis and AppVeyor.
+- [ ] __gpg__ can also be used for key decryption (with symmetric cipher). This solution is more portable than `opensl` encryption.
 - [ ] __rev__, __curl__, and a few other basic bash commands are required for the installer script. Standard on Travis, can be added to PATH for AppVeyor as per example below
 
 #### Install Janus:
@@ -102,7 +103,24 @@ replaces this:
 ## Examples and notes
 Please visit the [/examples directory](./examples) to find example Travis and AppVeyor configuration files, deploy script, and service key.
 
-#### Gotchas
+### Encrypting files
+#### With OpenSSL
+To encrypt file with `openssl` you should use following command:
+```
+openssl openssl aes-256-cbc -e -in input_file.json -out output_file.json.enc
+```
+#### With GPG
+To encrypt file with `gpg` you should use following command:
+```
+gpg --symmetric --cipher-algo AES-256 --output output_file.json.enc input_file.json
+```
+Different `--cipher-algo` may be used as well.
+
+### Gotchas
+
+The same version of `openssl` should be used for file encryption and decryption.
+
+----
 
 If you use a `script` deploy for Travis, __ensure that the deploy script is executable__, eg.
 ```yml
