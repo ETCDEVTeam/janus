@@ -331,6 +331,10 @@ func Test_parseSemverFromTag(t *testing.T) {
 	}{
 		{"v0.1.7", []string{"0", "1", "7"}},
 		{"0.1.7", []string{"0", "1", "7"}},
+		{"v0.1.7-stable", []string{"0", "1", "7"}},
+		{"vv0.1.7.very-unstable", []string{"0", "1", "7"}},
+		{"V0.1.7.very...unstable", []string{"0", "1", "7"}},
+		{"1.0.is-this-a-feature-or-bug?", []string{"1","0"}}, // PTAL IDK.
 	}
 
 	for _, tt := range table {

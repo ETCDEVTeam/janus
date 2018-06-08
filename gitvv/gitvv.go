@@ -116,8 +116,12 @@ func getLastTag(dir string) (string, bool) {
 
 // Assumes using semver format for tags, eg v3.5.0 or 3.4.0
 func parseSemverFromTag(s string) []string {
-	tag := strings.TrimPrefix(s, "v")
+	re := regexp.MustCompile(`\d*\.\d*\.\d*`)
+	tag := re.FindStringSubmatch(s)[0]
 	vers := strings.Split(tag, ".")
+	if len(vers) != 3 {
+		return nil
+	}
 	return vers
 }
 
