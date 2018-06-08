@@ -288,6 +288,8 @@ func GetVersion(format, dir string) string {
 		out = strings.Replace(out, "%B", "?", -1)
 		out = strings.Replace(out, "_B", "?", -1)
 	}
+	out = strings.Replace(out, "_T", lastTag, -1)
+	out = strings.Replace(out, "%T", lastTag, -1)
 
 	return out
 }

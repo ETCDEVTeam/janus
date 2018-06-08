@@ -249,6 +249,10 @@ func TestGetVersion(t *testing.T) {
 		{onTagDir, "v%M.%m.%P", "v0.0.1"},
 		{aboveTagDir, "v%M.%m.%P", "v0.0.1"},
 
+		{noTagsDir, "%T", ""},
+		{onTagDir, "%T-stable", "v0.0.1-stable"},
+		{aboveTagDir, "%T-unstable", "v0.0.1-unstable"},
+
 		{noTagsDir, "%C", "1"},
 		{onTagDir, "%C", "0"},
 		{aboveTagDir, "%C", "1"},
