@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ethereumproject/janus/gcp"
-	"github.com/ethereumproject/janus/gitvv"
+	"github.com/ETCDEVTeam/janus/gcp"
+	"github.com/ETCDEVTeam/janus/gitvv"
 )
 
 func main() {

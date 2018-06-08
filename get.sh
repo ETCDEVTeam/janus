@@ -7,7 +7,7 @@
 #
 # Install janus executable to system PATH.
 #
-# curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+# curl -sL https://raw.githubusercontent.com/ETCDEVTeam/janus/master/get.sh | bash
 # export PATH=$PATH:$PWD/janusbin
 
 set -e
@@ -16,13 +16,13 @@ TAR_FILE="/tmp/janus.tar.gz"
 TAR_FILE_SIG="/tmp/janus.tar.gz.sig"
 ISAAC_GPG_FILE="/tmp/isaac-gpg.txt"
 ISAAC_GPG_URL="https://raw.githubusercontent.com/ethereumproject/volunteer/7a78a94307d67a0b20e418568b7bccac83c3d143/Volunteer-Public-Keys/isaac.ardis%40gmail.com"
-DOWNLOAD_URL="https://github.com/ethereumproject/janus/releases/download"
+DOWNLOAD_URL="https://github.com/ETCDEVTeam/janus/releases/download"
 test -z "$TMPDIR" && TMPDIR="$(mktemp -d)"
 
 last_version() {
   # The new and improved sans-GithubAPI-rate-limited curler.
   # https://github.com/goreleaser/goreleaser/issues/157
-  curl -sL -o /dev/null -w %{url_effective} https://github.com/ethereumproject/janus/releases/latest | rev | cut -f1 -d'/'| rev
+  curl -sL -o /dev/null -w %{url_effective} https://github.com/ETCDEVTeam/janus/releases/latest | rev | cut -f1 -d'/'| rev
 }
 
 download() {
