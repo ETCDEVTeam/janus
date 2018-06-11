@@ -15,14 +15,14 @@ environment.
 
 ##### Travis
 ```shell
-- curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh | bash
+- curl -sL https://raw.githubusercontent.com/ETCDEVTeam/janus/master/get.sh | bash
 - export PATH=./janusbin:$PATH
 ```
 
 ##### AppVeyor
 ```shell
 - set PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin\;%PATH%
-- curl -sL https://raw.githubusercontent.com/ethereumproject/janus/master/get-windows.sh | bash
+- curl -sL https://raw.githubusercontent.com/ETCDEVTeam/janus/master/get-windows.sh | bash
 - set PATH=./janusbin;%PATH%
 ```
 
@@ -38,8 +38,8 @@ In practice, this would look like:
 ```yml
  - curl -sLO https://raw.githubusercontent.com/ethereumproject/volunteer/7a78a94307d67a0b20e418568b7bccac83c3d143/Volunteer-Public-Keys/isaac.ardis%40gmail.com
  - gpg --import isaac.ardis@gmail.com
- - curl -sLO https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh
- - curl -sLO https://raw.githubusercontent.com/ethereumproject/janus/master/get.sh.sig
+ - curl -sLO https://raw.githubusercontent.com/ETCDEVTeam/janus/master/get.sh
+ - curl -sLO https://raw.githubusercontent.com/ETCDEVTeam/janus/master/get.sh.sig
  - gpg --verify get.sh.sig get.sh
  - chmod +x get.sh
  - bash get.sh
