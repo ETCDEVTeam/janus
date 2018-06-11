@@ -249,6 +249,10 @@ func TestGetVersion(t *testing.T) {
 		{onTagDir, "v%M.%m.%P", "v0.0.1"},
 		{aboveTagDir, "v%M.%m.%P", "v0.0.1"},
 
+		{noTagsDir, "%T", ""},
+		{onTagDir, "%T-stable", "v0.0.1-stable"},
+		{aboveTagDir, "%T-unstable", "v0.0.1-unstable"},
+
 		{noTagsDir, "%C", "1"},
 		{onTagDir, "%C", "0"},
 		{aboveTagDir, "%C", "1"},
@@ -331,6 +335,10 @@ func Test_parseSemverFromTag(t *testing.T) {
 	}{
 		{"v0.1.7", []string{"0", "1", "7"}},
 		{"0.1.7", []string{"0", "1", "7"}},
+		{"v0.1.7-stable", []string{"0", "1", "7"}},
+		{"vv0.1.7.very-unstable", []string{"0", "1", "7"}},
+		{"V0.1.7.very...unstable", []string{"0", "1", "7"}},
+		{"1.0.is-this-a-feature-or-bug?", []string{"1","0"}}, // PTAL IDK.
 	}
 
 	for _, tt := range table {

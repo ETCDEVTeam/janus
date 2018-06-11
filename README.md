@@ -82,6 +82,7 @@ $ janus version -format='v%M.%m.%P+%C-%S'
 %B, _B - hybrid patch version: `(%P * 100) + %C`
 %C, _C - commit count since last tag
 %S, _S - HEAD sha1 (first 7 characters)
+%T, _T - full tag string
 ```
 _Note_: you may use either `%M` or `_M` syntax to interpolate version variables, since escaping `%` in batch scripts is rather tricky.
 
